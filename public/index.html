@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Be-Read Exchange Hub</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 To-Be-Read Exchange Hub</h1>
+            <p>Smart Inventory Management System</p>
+        </header>
+
+        <div class="actions">
+            <button id="addBookBtn" class="btn btn-primary">+ Add Book</button>
+            <button id="syncPingoBtn" class="btn btn-secondary">🔄 Sync Pingo Inventory</button>
+        </div>
+
+        <div class="books-container">
+            <h2>Book Inventory</h2>
+            <div id="booksGrid" class="books-grid"></div>
+        </div>
+    </div>
+
+    <!-- Add Book Modal -->
+    <div id="addBookModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Book</h2>
+            <form id="addBookForm">
+                <div class="form-group">
+                    <label for="isbn">ISBN:</label>
+                    <input type="text" id="isbn" name="isbn" placeholder="Enter ISBN (optional)">
+                    <small>Book data will be automatically enriched if ISBN is provided</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="title">Title: *</label>
+                    <input type="text" id="title" name="title" required placeholder="Enter book title">
+                </div>
+
+                <div class="form-group">
+                    <label for="author">Author:</label>
+                    <input type="text" id="author" name="author" placeholder="Enter author name">
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="shelfLocation">Shelf/Section (Optional):</label>
+                    <input type="text" id="shelfLocation" name="shelf_location" placeholder="e.g., A-12 or Shelf A, Section 12">
+                    <small>Leave blank for automatic smart inventory placement</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Book</button>
+                    <button type="button" class="btn btn-cancel" id="cancelAddBook">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sync Modal -->
+    <div id="syncModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeSyncModal">&times;</span>
+            <h2>Sync Pingo Inventory</h2>
+            <form id="syncPingoForm">
+                <div class="form-group">
+                    <label for="pingoData">Paste JSON data:</label>
+                    <textarea id="pingoData" name="pingoData" rows="10" placeholder='[{"isbn": "9780123456789", "title": "Book Title", "author": "Author Name", "quantity": 5}]' required></textarea>
+                    <small>Expected format: Array of books with isbn, title, author, and quantity</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Sync Data</button>
+                    <button type="button" class="btn btn-cancel" id="cancelSync">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
