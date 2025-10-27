@@ -43,10 +43,10 @@ jobs:
         fi
         
         echo "✅ Deployment token verified"
-        echo "🔐 Token length: ${#DEPLOY_TOKEN} characters"
         
         # Deployment commands with token authentication
         # The deployment method depends on your hosting platform
+        # Uncomment and configure the appropriate section below:
         # 
         # For Vercel:
         # npm install -g vercel
@@ -62,8 +62,8 @@ jobs:
         #   -H "Content-Type: application/json" \
         #   -d '{"artifact":"production-build"}'
         
-        echo "⏳ Deployment initiated with authenticated token"
-        echo "✅ Deployment completed successfully!"
+        echo "⏳ Deployment configuration ready"
+        echo "⚠️  Note: Uncomment deployment commands above to enable actual deployment"
       env:
         DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
         
