@@ -87,7 +87,8 @@ async function calculateOptimalLocation(bookData) {
       section: sectionValue.toString()
     };
   } catch (error) {
-    console.error('Error calculating optimal location:', error);
+    const logger = require('../utils/logger');
+    logger.error('Error calculating optimal location: %s', error);
     // Fallback to default location
     return {
       shelf_location: shelf,

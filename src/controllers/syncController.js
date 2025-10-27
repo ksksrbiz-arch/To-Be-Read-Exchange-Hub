@@ -77,7 +77,8 @@ async function syncPingoInventory(req, res) {
 
         booksSynced++;
       } catch (error) {
-        console.error('Error syncing book:', error);
+        const logger = require('../utils/logger');
+        logger.error('Error syncing book: %s', error);
         errors.push({ book: pingoBook, error: error.message });
       }
     }
@@ -97,25 +98,26 @@ async function syncPingoInventory(req, res) {
       totalBooks: books.length,
       errors: errors.length > 0 ? errors : undefined
     });
-  } catch (error) {
-    await client.query('ROLLBACK');
-    console.error('Error syncing Pingo inventory:', error);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      const logger = require('../utils/logger');
+      logger.error('Error syncing Pingo inventory: %s', error);
 
-    // Log the failed sync
-    try {
-      await pool.query(
-        `INSERT INTO pingo_sync_log (books_synced, status, error_message)
-         VALUES ($1, $2, $3)`,
-        [0, 'failed', error.message]
-      );
-    } catch (logError) {
-      console.error('Error logging sync failure:', logError);
+      // Log the failed sync
+      try {
+        await pool.query(
+          `INSERT INTO pingo_sync_log (books_synced, status, error_message)
+           VALUES ($1, $2, $3)`,
+          [0, 'failed', error.message]
+        );
+      } catch (logError) {
+        logger.error('Error logging sync failure: %s', logError);
+      }
+
+      res.status(500).json({ error: 'Failed to sync Pingo inventory', message: error.message });
+    } finally {
+      client.release();
     }
-
-    res.status(500).json({ error: 'Failed to sync Pingo inventory', message: error.message });
-  } finally {
-    client.release();
-  }
 }
 
 /**

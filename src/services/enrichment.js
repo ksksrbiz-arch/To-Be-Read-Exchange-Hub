@@ -25,7 +25,8 @@ async function enrichBookData(isbn) {
       enrichedData.cover_url = enrichedData.cover_url || openLibraryData.cover_url;
     }
   } catch (error) {
-    console.error('Error fetching from Open Library:', error.message);
+    const logger = require('../utils/logger');
+    logger.error('Error fetching from Open Library: %s', error.message);
   }
 
   try {
@@ -39,7 +40,8 @@ async function enrichBookData(isbn) {
       enrichedData.cover_url = enrichedData.cover_url || googleBooksData.cover_url;
     }
   } catch (error) {
-    console.error('Error fetching from Google Books:', error.message);
+    const logger = require('../utils/logger');
+    logger.error('Error fetching from Google Books: %s', error.message);
   }
 
   return enrichedData;
@@ -70,7 +72,8 @@ async function fetchFromOpenLibrary(isbn) {
       cover_url: bookData.cover ? (bookData.cover.large || bookData.cover.medium || bookData.cover.small) : null
     };
   } catch (error) {
-    console.error('Open Library API error:', error.message);
+    const logger = require('../utils/logger');
+    logger.error('Open Library API error: %s', error.message);
     return null;
   }
 }
@@ -100,7 +103,8 @@ async function fetchFromGoogleBooks(isbn) {
       cover_url: bookInfo.imageLinks ? (bookInfo.imageLinks.thumbnail || bookInfo.imageLinks.smallThumbnail) : null
     };
   } catch (error) {
-    console.error('Google Books API error:', error.message);
+    const logger = require('../utils/logger');
+    logger.error('Google Books API error: %s', error.message);
     return null;
   }
 }
