@@ -17,14 +17,15 @@ async function createBook(req, res) {
     let bookData = { isbn, title, author };
     
     if (isbn) {
-      const enrichedData = await enrichBookData(isbn);
+      // enrichment can return null when APIs fail — guard against that
+      const enrichedData = (await enrichBookData(isbn)) || {};
       bookData = {
         ...bookData,
-        title: bookData.title || enrichedData.title,
-        author: bookData.author || enrichedData.author,
-        publisher: enrichedData.publisher,
-        description: enrichedData.description,
-        cover_url: enrichedData.cover_url
+        title: bookData.title || enrichedData.title || null,
+        author: bookData.author || enrichedData.author || null,
+        publisher: enrichedData.publisher || null,
+        description: enrichedData.description || null,
+        cover_url: enrichedData.cover_url || null
       };
     }
 
@@ -59,7 +60,8 @@ async function createBook(req, res) {
       book: result.rows[0]
     });
   } catch (error) {
-    console.error('Error creating book:', error);
+    const logger = require('../utils/logger');
+    logger.error('Error creating book: %s', error);
     res.status(500).json({ error: 'Failed to create book', message: error.message });
   }
 }
@@ -72,7 +74,8 @@ async function getBooks(req, res) {
     const result = await pool.query('SELECT * FROM books ORDER BY created_at DESC');
     res.json({ success: true, books: result.rows });
   } catch (error) {
-    console.error('Error fetching books:', error);
+    const logger = require('../utils/logger');
+    logger.error('Error fetching books: %s', error);
     res.status(500).json({ error: 'Failed to fetch books' });
   }
 }
@@ -92,7 +95,8 @@ async function getBookById(req, res) {
     
     res.json({ success: true, book: result.rows[0] });
   } catch (error) {
-    console.error('Error fetching book:', error);
+    const logger = require('../utils/logger');
+    logger.error('Error fetching book: %s', error);
     res.status(500).json({ error: 'Failed to fetch book' });
   }
 }
@@ -126,7 +130,8 @@ async function updateBook(req, res) {
     
     res.json({ success: true, book: result.rows[0] });
   } catch (error) {
-    console.error('Error updating book:', error);
+    const logger = require('../utils/logger');
+    logger.error('Error updating book: %s', error);
     res.status(500).json({ error: 'Failed to update book' });
   }
 }
@@ -146,7 +151,8 @@ async function deleteBook(req, res) {
     
     res.json({ success: true, message: 'Book deleted successfully' });
   } catch (error) {
-    console.error('Error deleting book:', error);
+    const logger = require('../utils/logger');
+    logger.error('Error deleting book: %s', error);
     res.status(500).json({ error: 'Failed to delete book' });
   }
 }

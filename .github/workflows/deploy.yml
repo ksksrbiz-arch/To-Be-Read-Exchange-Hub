@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build application
+      run: npm run build
+      
+    - name: Run tests before deploy
+      run: npm test
+      
+    - name: Deploy to production
+      run: |
+        echo "🚀 Deploying to production environment..."
+        # Add your deployment commands here
+        # Examples:
+        # - Deploy to Vercel: vercel --prod
+        # - Deploy to Netlify: netlify deploy --prod
+        # - Deploy to AWS: aws s3 sync dist/ s3://your-bucket
+      env:
+        DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        
+    - name: Create deployment notification
+      if: success()
+      run: |
+        echo "✅ Deployment successful!"
+        
+    - name: Rollback on failure
+      if: failure()
+      run: |
+        echo "❌ Deployment failed - initiating rollback..."
+        # Add rollback logic here
