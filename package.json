@@ -7,7 +7,10 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest --coverage",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "build": "node -e \"console.log('build placeholder')\"",
+    "lint": "node -e \"console.log('lint placeholder')\"",
+    "format:check": "node -e \"console.log('format check placeholder')\""
   },
   "keywords": [],
   "author": "",
