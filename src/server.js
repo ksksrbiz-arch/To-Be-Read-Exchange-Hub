@@ -11,18 +11,23 @@ const syncRoutes = require('./routes/sync');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Rate limiting middleware
+// Rate limiting middleware (configurable via env)
+const API_RATE_WINDOW_MIN = parseInt(process.env.API_RATE_WINDOW_MIN || '15', 10);
+const API_RATE_MAX = parseInt(process.env.API_RATE_MAX || '100', 10);
+const SYNC_RATE_WINDOW_MIN = parseInt(process.env.SYNC_RATE_WINDOW_MIN || '15', 10);
+const SYNC_RATE_MAX = parseInt(process.env.SYNC_RATE_MAX || '10', 10);
+
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: API_RATE_WINDOW_MIN * 60 * 1000,
+  max: API_RATE_MAX,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 const syncLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limit sync operations to 10 per 15 minutes
+  windowMs: SYNC_RATE_WINDOW_MIN * 60 * 1000,
+  max: SYNC_RATE_MAX,
   message: 'Too many sync requests, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
