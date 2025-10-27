@@ -14,6 +14,7 @@ A smart inventory management system for book exchange with automated data enrich
 - [Smart Inventory Logic](#smart-inventory-logic)
 - [Data Enrichment](#data-enrichment)
 - [Testing](#testing)
+- [Deployment](#deployment)
 - [Development](#development)
 - [Database Schema](#database-schema)
 - [Troubleshooting](#troubleshooting)
@@ -542,6 +543,101 @@ Current test coverage:
 - **32** test cases
 - Unit tests for services and utilities
 - Integration tests for API endpoints
+
+## Deployment
+
+The application includes automated deployment workflows via GitHub Actions. Follow these steps to set up and trigger deployments.
+
+### Prerequisites
+
+Before deploying, you need to configure the `DEPLOY_TOKEN` secret in your GitHub repository:
+
+1. **Navigate to Repository Settings**
+   - Go to your repository on GitHub
+   - Click on **Settings** > **Secrets and variables** > **Actions**
+
+2. **Add DEPLOY_TOKEN Secret**
+   - Click **New repository secret**
+   - Name: `DEPLOY_TOKEN`
+   - Value: Your deployment token/key (see platform-specific instructions below)
+
+### Platform-Specific Setup
+
+#### Vercel Deployment
+
+1. Get your Vercel token from [vercel.com/account/tokens](https://vercel.com/account/tokens)
+2. Add it as `DEPLOY_TOKEN` in GitHub Secrets
+3. Uncomment the Vercel deployment command in `.github/workflows/deploy.yml`:
+   ```yaml
+   vercel --prod --token=$DEPLOY_TOKEN
+   ```
+
+#### Netlify Deployment
+
+1. Generate a Netlify personal access token from your [Netlify account settings](https://app.netlify.com/user/applications)
+2. Add it as `DEPLOY_TOKEN` in GitHub Secrets
+3. Uncomment the Netlify deployment command in `.github/workflows/deploy.yml`:
+   ```yaml
+   netlify deploy --prod --auth=$DEPLOY_TOKEN
+   ```
+
+#### AWS S3 Deployment
+
+1. Create AWS credentials (Access Key ID and Secret Access Key) with S3 permissions
+2. Format them as `AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY`
+3. Add the formatted string as `DEPLOY_TOKEN` in GitHub Secrets
+4. Uncomment and configure the AWS deployment command in `.github/workflows/deploy.yml`:
+   ```yaml
+   aws s3 sync dist/ s3://your-bucket --region us-east-1
+   ```
+
+### Triggering Deployments
+
+Deployments can be triggered in two ways:
+
+1. **Automatic Deployment**
+   - Deployments automatically run when code is pushed to the `main` branch
+   - The workflow will build, test, and deploy your application
+
+2. **Manual Deployment**
+   - Go to **Actions** tab in your GitHub repository
+   - Select the **Deploy** workflow
+   - Click **Run workflow**
+   - Choose the branch to deploy (usually `main`)
+   - Click **Run workflow** button
+
+### Security Notes
+
+⚠️ **Important Security Considerations:**
+
+- Never commit deployment tokens or credentials to your repository
+- Always use GitHub Secrets to store sensitive tokens
+- Regularly rotate your deployment tokens
+- Use environment-specific tokens (separate tokens for staging/production)
+- Review deployment logs for any exposed credentials
+- Consider using OIDC authentication for AWS/Azure deployments instead of static credentials
+
+### Deployment Process
+
+The deployment workflow automatically:
+
+1. ✅ Verifies that `DEPLOY_TOKEN` is configured
+2. 📦 Installs dependencies with `npm ci`
+3. 🔨 Builds the application with `npm run build`
+4. 🧪 Runs tests to ensure code quality
+5. 🚀 Deploys to your configured platform
+6. ✅ Confirms successful deployment or initiates rollback on failure
+
+### Troubleshooting Deployment
+
+**Deployment fails with "DEPLOY_TOKEN not set":**
+- Ensure you've added the `DEPLOY_TOKEN` secret in GitHub repository settings
+- Verify the secret name is exactly `DEPLOY_TOKEN` (case-sensitive)
+
+**Deployment succeeds but application doesn't update:**
+- Check your platform-specific deployment command is uncommented
+- Verify the deployment target (bucket, site ID, etc.) is correct
+- Review deployment logs in the Actions tab
 
 ## Development
 
