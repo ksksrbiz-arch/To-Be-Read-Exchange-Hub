@@ -33,14 +33,15 @@ async function syncPingoInventory(req, res) {
         let bookData = { isbn, title, author };
         
         if (isbn) {
-          const enrichedData = await enrichBookData(isbn);
+          // enrichment can fail or return null — use a safe fallback
+          const enrichedData = (await enrichBookData(isbn)) || {};
           bookData = {
             ...bookData,
-            title: bookData.title || enrichedData.title,
-            author: bookData.author || enrichedData.author,
-            publisher: enrichedData.publisher,
-            description: enrichedData.description,
-            cover_url: enrichedData.cover_url
+            title: bookData.title || enrichedData.title || null,
+            author: bookData.author || enrichedData.author || null,
+            publisher: enrichedData.publisher || null,
+            description: enrichedData.description || null,
+            cover_url: enrichedData.cover_url || null
           };
         }
 
