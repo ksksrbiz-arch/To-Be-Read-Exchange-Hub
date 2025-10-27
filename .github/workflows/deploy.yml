@@ -12,6 +12,17 @@ jobs:
     environment: production
     
     steps:
+    - name: Verify deployment token
+      run: |
+        if [ -z "$DEPLOY_TOKEN" ]; then
+          echo "❌ Error: DEPLOY_TOKEN secret is not configured"
+          echo "Please add DEPLOY_TOKEN to your repository secrets"
+          exit 1
+        fi
+        echo "✅ Deployment token verified"
+      env:
+        DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+    
     - name: Checkout code
       uses: actions/checkout@v4
       
@@ -34,15 +45,6 @@ jobs:
       run: |
         echo "🚀 Deploying to production environment..."
         echo "📦 Build artifacts ready for deployment"
-        
-        # Verify deployment token is configured
-        if [ -z "$DEPLOY_TOKEN" ]; then
-          echo "❌ Error: DEPLOY_TOKEN secret is not configured"
-          echo "Please add DEPLOY_TOKEN to your repository secrets"
-          exit 1
-        fi
-        
-        echo "✅ Deployment token verified"
         
         # Deployment commands with token authentication
         # The deployment method depends on your hosting platform

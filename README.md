@@ -725,7 +725,8 @@ netlify deploy --prod --auth=$DEPLOY_TOKEN
 ```
 
 **For Custom API-based Deployment:**
-```yaml
+```sh
+# Using environment variable (recommended in CI/CD)
 curl -X POST https://api.yourplatform.com/deploy \
   -H "Authorization: Bearer $DEPLOY_TOKEN" \
   -H "Content-Type: application/json" \
@@ -735,14 +736,15 @@ curl -X POST https://api.yourplatform.com/deploy \
 #### 3. Deployment Workflow
 
 The deployment workflow automatically:
+- ✅ Verifies deployment token is configured
 - ✅ Checks out the latest code
 - ✅ Sets up Node.js environment
 - ✅ Installs dependencies
 - ✅ Builds the application
 - ✅ Runs tests to verify stability
 - ✅ Deploys to production (if all checks pass)
-- ✅ Sends deployment notifications
-- ✅ Initiates rollback on failure
+- 🚧 Sends deployment notifications (placeholder - requires implementation)
+- 🚧 Initiates rollback on failure (placeholder - requires implementation)
 
 #### 4. Manual Deployment
 
