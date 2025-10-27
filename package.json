@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node src/server.js",
+    "build": "echo '📦 Building application...' && echo '✅ Build completed (no build step required for Node.js server)'",
+    "lint": "echo '🔍 Linting skipped - no linter configured'",
+    "format:check": "echo '✨ Format check skipped - no formatter configured'",
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },

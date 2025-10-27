@@ -692,6 +692,90 @@ psql books_exchange < src/config/schema.sql
 - Check the [Issues](https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub/issues) page
 - Create a new issue with detailed error messages and steps to reproduce
 
+## Deployment
+
+The project includes automated deployment via GitHub Actions when code is pushed to the `main` branch.
+
+### Setting Up Deployment
+
+#### 1. Configure the Deployment Token
+
+The deployment workflow requires a `DEPLOY_TOKEN` secret to be configured in your GitHub repository:
+
+1. Navigate to your repository on GitHub
+2. Go to **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret**
+4. Add a secret named `DEPLOY_TOKEN`
+5. Paste your deployment token value (obtain this from your hosting provider)
+
+#### 2. Deployment Platforms
+
+The workflow is configured to work with various hosting platforms. Uncomment and configure the appropriate section in `.github/workflows/deploy.yml`:
+
+**For Vercel:**
+```yaml
+npm install -g vercel
+vercel --prod --token=$DEPLOY_TOKEN
+```
+
+**For Netlify:**
+```yaml
+npm install -g netlify-cli
+netlify deploy --prod --auth=$DEPLOY_TOKEN
+```
+
+**For Custom API-based Deployment:**
+```yaml
+curl -X POST https://api.yourplatform.com/deploy \
+  -H "Authorization: Bearer $DEPLOY_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"artifact":"production-build"}'
+```
+
+#### 3. Deployment Workflow
+
+The deployment workflow automatically:
+- ✅ Checks out the latest code
+- ✅ Sets up Node.js environment
+- ✅ Installs dependencies
+- ✅ Builds the application
+- ✅ Runs tests to verify stability
+- ✅ Deploys to production (if all checks pass)
+- ✅ Sends deployment notifications
+- ✅ Initiates rollback on failure
+
+#### 4. Manual Deployment
+
+You can also trigger deployments manually:
+
+1. Go to the **Actions** tab in your GitHub repository
+2. Select the **Deploy** workflow
+3. Click **Run workflow**
+4. Select the `main` branch
+5. Click **Run workflow** button
+
+### Environment Configuration
+
+For production deployment, ensure your hosting platform has the following environment variables configured:
+
+```env
+NODE_ENV=production
+PORT=3000
+DB_USER=your_production_db_user
+DB_HOST=your_production_db_host
+DB_NAME=books_exchange
+DB_PASSWORD=your_production_db_password
+DB_PORT=5432
+```
+
+### Deployment Security
+
+- ✅ Never commit the `DEPLOY_TOKEN` to your repository
+- ✅ Use GitHub Secrets for sensitive information
+- ✅ Rotate deployment tokens regularly
+- ✅ Use different tokens for staging and production environments
+- ✅ Limit token permissions to deployment operations only
+
 ## Contributing
 
 1. Fork the repository
