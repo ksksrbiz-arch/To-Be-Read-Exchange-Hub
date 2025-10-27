@@ -707,4 +707,3 @@ This project is licensed under the ISC License - see the LICENSE file for detail
 ---
 
 **Made with ❤️ for book lovers and exchange communities**
-This project is licensed under the ISC License - see the LICENSE file for details.
