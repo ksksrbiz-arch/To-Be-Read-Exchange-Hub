@@ -112,12 +112,20 @@ jobs:
       with:
         fetch-depth: 0
         
-    - name: TruffleHog Secret Scan
+    - name: TruffleHog - Scan recent commits
+      if: github.event_name == 'push' || github.event_name == 'pull_request'
       uses: trufflesecurity/trufflehog@main
       with:
         path: ./
-        base: ${{ github.event.repository.default_branch }}
-        head: HEAD
+        base: ${{ github.event.before }}
+        head: ${{ github.event.after }}
+        extra_args: --debug --only-verified
+        
+    - name: TruffleHog - Scan entire history
+      if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
         extra_args: --debug --only-verified
 
   # Job 5: Container Security (if using Docker)

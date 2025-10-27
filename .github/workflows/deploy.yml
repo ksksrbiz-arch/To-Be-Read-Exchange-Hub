@@ -12,6 +12,19 @@ jobs:
     environment: production
     
     steps:
+    - name: Verify DEPLOY_TOKEN is set
+      run: |
+        if [ -z "${{ secrets.DEPLOY_TOKEN }}" ]; then
+          echo "❌ ERROR: DEPLOY_TOKEN secret is not set!"
+          echo "Please add DEPLOY_TOKEN to your GitHub repository secrets:"
+          echo "  1. Go to Settings > Secrets and variables > Actions"
+          echo "  2. Click 'New repository secret'"
+          echo "  3. Name: DEPLOY_TOKEN"
+          echo "  4. Value: Your deployment token/key"
+          exit 1
+        fi
+        echo "✅ DEPLOY_TOKEN is configured"
+    
     - name: Checkout code
       uses: actions/checkout@v4
       
@@ -33,11 +46,22 @@ jobs:
     - name: Deploy to production
       run: |
         echo "🚀 Deploying to production environment..."
-        # Add your deployment commands here
-        # Examples:
-        # - Deploy to Vercel: vercel --prod
-        # - Deploy to Netlify: netlify deploy --prod
-        # - Deploy to AWS: aws s3 sync dist/ s3://your-bucket
+        # Add your deployment commands here based on your hosting platform
+        # Uncomment and configure the appropriate command for your platform:
+        #
+        # For Vercel:
+        # vercel --prod --token=$DEPLOY_TOKEN
+        #
+        # For Netlify:
+        # netlify deploy --prod --auth=$DEPLOY_TOKEN
+        #
+        # For AWS S3:
+        # aws s3 sync dist/ s3://your-bucket --region us-east-1
+        # (Set DEPLOY_TOKEN to AWS credentials in format: AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY)
+        #
+        # For Heroku:
+        # git push heroku main
+        # (Set DEPLOY_TOKEN to Heroku API key)
       env:
         DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
         
