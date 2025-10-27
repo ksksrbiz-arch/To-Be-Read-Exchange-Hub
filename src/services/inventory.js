@@ -29,10 +29,10 @@ function parseLocation(locationString) {
     return [null, null];
   }
 
-  // Try to parse formats like "A-12", "Shelf A", "Section 12", etc.
-  const dashFormat = locationString.match(/^([A-Z]+)-(\d+)$/);
+  // Try to parse formats like "A-12", "a-12", "Shelf A", "Section 12", etc.
+  const dashFormat = locationString.match(/^([A-Za-z]+)-(\d+)$/i);
   if (dashFormat) {
-    return [dashFormat[1], dashFormat[2]];
+    return [dashFormat[1].toUpperCase(), dashFormat[2]];
   }
 
   const parts = locationString.split(/[,\s]+/);
@@ -41,15 +41,15 @@ function parseLocation(locationString) {
 
   for (let i = 0; i < parts.length; i++) {
     if (parts[i].toLowerCase().includes('shelf') && i + 1 < parts.length) {
-      shelf = parts[i + 1];
+      shelf = parts[i + 1].toUpperCase();
     } else if (parts[i].toLowerCase().includes('section') && i + 1 < parts.length) {
       section = parts[i + 1];
     }
   }
 
-  // If still no match, use the whole string as shelf
+  // If still no match, use the whole string as shelf (uppercase)
   if (!shelf && !section) {
-    shelf = locationString;
+    shelf = locationString.toUpperCase();
   }
 
   return [shelf, section];
