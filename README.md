@@ -1271,6 +1271,7 @@ Complete reference of all available commands:
 | `npm run deploy:heroku` | 🚀 Deploy to Heroku with automated checks               |
 | `npm run deploy:aws`    | ☁️ Deploy to AWS EC2 with PM2                           |
 | `npm run deploy:docker` | 🐳 Deploy using Docker standalone                       |
+| `npm run debug`         | 🐞 Start server with Node inspector (port 9229)         |
 
 **Recommended Workflow:**
 
@@ -1327,6 +1328,79 @@ To-Be-Read-Exchange-Hub/
 ```
 
 ## Database Schema
+
+## Debugging
+
+You can debug the application locally or inside the Docker container.
+
+### 1. Local Debug (Recommended for quick iteration)
+
+1. Start the server in debug mode:
+
+```bash
+npm run debug
+```
+
+This runs Node with the inspector listening on `0.0.0.0:9229` and restarts on changes via `nodemon`.
+
+1. In VS Code, open the Run and Debug panel and choose `Launch Server (Local)`.
+2. Set breakpoints (e.g., in `src/controllers/bulkController.js` or `src/services/enrichment.js`).
+3. Trigger API requests (via Swagger UI or curl) and inspect variables.
+
+### 2. Debugging Jest Tests
+
+Use the `Jest Tests (Debug)` configuration to step through individual tests:
+
+1. Open the Run and Debug panel.
+2. Select `Jest Tests (Debug)`.
+3. Add a breakpoint in the test or source file.
+4. The runner starts paused at the first line (`--inspect-brk`). Continue execution to hit breakpoints.
+
+### 3. Attach to Docker Container
+
+If the app is running in Docker (e.g., via `docker-compose up`):
+
+1. Expose the inspector port by starting the container with:
+
+```bash
+docker compose run -p 3000:3000 -p 9229:9229 app node --inspect=0.0.0.0:9229 src/server.js
+```
+
+Or exec into the running container:
+
+```bash
+docker exec -it books-exchange-app node --inspect=0.0.0.0:9229 src/server.js
+```
+
+1. In VS Code, select `Attach to Docker App`.
+2. Set breakpoints and invoke requests to hit them.
+
+### Common Breakpoint Targets
+
+- `src/controllers/bookController.js`: Creation/update logic
+- `src/controllers/bulkController.js`: Bulk import/update failure handling
+- `src/services/enrichment.js`: External API merging and fallback logic
+- `src/services/inventory.js`: Storage location determination
+- `src/routes/books.js`: Request validation pipeline
+
+### Tips
+
+- Use `console.time()` / `console.timeEnd()` for quick performance snapshots.
+- Conditional breakpoints help reduce noise (right-click breakpoint → Edit).
+- If breakpoints aren’t hit, ensure the process actually restarted with inspector and code paths executed.
+- For test debugging, narrow scope using `it.only` or pass a test file path as an argument.
+
+### Troubleshooting Debugging
+
+| Issue | Solution |
+|-------|----------|
+| VS Code can’t attach | Ensure process started with `--inspect` or `--inspect-brk` and port 9229 exposed |
+| Breakpoints grey/hollow | File mismatch – confirm path matches workspace folder |
+| Port already in use | Kill old process: `lsof -i :9229` then `kill <pid>` |
+| Container attach fails | Map port `9229:9229` and start node with inspector inside container |
+| Jest exits before attach | Use `--inspect-brk` (configured) so execution pauses at start |
+
+Happy debugging! 🐞
 
 ### Books Table
 

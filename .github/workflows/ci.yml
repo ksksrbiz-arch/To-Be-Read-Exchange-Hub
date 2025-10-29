@@ -1,4 +1,65 @@
-name: Continuous Integration
+name: CI
+
+on:
+  push:
+    branches: [ main, feat/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    env:
+      LOG_LEVEL: debug
+      NODE_ENV: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Upload coverage report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+
+      - name: Create failure summary file
+        if: failure()
+        run: |
+          echo "CI run failed on commit ${{ github.sha }} for ref ${{ github.ref }}" > ci-failure.md
+          echo "Job URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> ci-failure.md
+
+      - name: Open issue on failure
+        if: failure()
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "CI Failure on ${{ github.ref }}"
+          content-filepath: ci-failure.md
+          labels: 'ci, automated'
+
+  summarize:
+    needs: build-test
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "Build/Test Job conclusion: ${{ needs.build-test.result }}"name: Continuous Integration
 
 on:
   push:
