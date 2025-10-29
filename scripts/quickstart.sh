@@ -122,8 +122,20 @@ EOL
     fi
     
     echo ""
-    echo -e "${BLUE}⏳ Waiting for services to be healthy (30s)...${NC}"
-    sleep 30
+    echo -e "${BLUE}⏳ Waiting for services to be healthy...${NC}"
+    
+    # Poll for health with timeout
+    MAX_WAIT=30
+    ELAPSED=0
+    while [ $ELAPSED -lt $MAX_WAIT ]; do
+        if curl -f http://localhost:3000/api/health &> /dev/null; then
+            break
+        fi
+        sleep 2
+        ELAPSED=$((ELAPSED + 2))
+        echo -n "."
+    done
+    echo ""
     
     # Health check
     if curl -f http://localhost:3000/api/health &> /dev/null; then

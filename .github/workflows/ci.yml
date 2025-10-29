@@ -1,65 +1,4 @@
-name: CI
-
-on:
-  push:
-    branches: [ main, feat/* ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  build-test:
-    runs-on: ubuntu-latest
-    env:
-      LOG_LEVEL: debug
-      NODE_ENV: test
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Run tests
-        run: npm test
-
-      - name: Upload coverage report
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage
-
-      - name: Create failure summary file
-        if: failure()
-        run: |
-          echo "CI run failed on commit ${{ github.sha }} for ref ${{ github.ref }}" > ci-failure.md
-          echo "Job URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> ci-failure.md
-
-      - name: Open issue on failure
-        if: failure()
-        uses: peter-evans/create-issue-from-file@v5
-        with:
-          title: "CI Failure on ${{ github.ref }}"
-          content-filepath: ci-failure.md
-          labels: 'ci, automated'
-
-  summarize:
-    needs: build-test
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Summary
-        run: |
-          echo "Build/Test Job conclusion: ${{ needs.build-test.result }}"name: Continuous Integration
+name: Continuous Integration
 
 on:
   push:
@@ -106,27 +45,23 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20.x'
           cache: 'npm'
 
       - name: Cache node modules
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-${{ matrix.node-version }}-
             ${{ runner.os }}-node-
 
       - name: Install dependencies
@@ -136,7 +71,6 @@ jobs:
         run: npm test -- --coverage
 
       - name: Upload coverage reports
-        if: matrix.node-version == '20.x'
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage/coverage-final.json

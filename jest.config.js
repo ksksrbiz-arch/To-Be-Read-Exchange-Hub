@@ -15,4 +15,11 @@ module.exports = {
     },
   },
   setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.js'],
+  
+  // Performance optimizations
+  maxWorkers: '75%',
+  maxConcurrency: 5,
+  testTimeout: 10000,
+  cache: true,
+  cacheDirectory: '<rootDir>/.jest-cache',
 };
