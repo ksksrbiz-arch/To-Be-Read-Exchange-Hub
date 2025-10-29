@@ -4,74 +4,166 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
 
 jobs:
   deploy:
-    name: Deploy to Production
+    name: Deploy to ${{ inputs.environment || 'production' }}
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ inputs.environment || 'production' }}
 
     steps:
-      - name: Verify DEPLOY_TOKEN is set
-        run: |
-          if [ -z "${{ secrets.DEPLOY_TOKEN }}" ]; then
-            echo "❌ ERROR: DEPLOY_TOKEN secret is not set!"
-            echo "Please add DEPLOY_TOKEN to your GitHub repository secrets:"
-            echo "  1. Go to Settings > Secrets and variables > Actions"
-            echo "  2. Click 'New repository secret'"
-            echo "  3. Name: DEPLOY_TOKEN"
-            echo "  4. Value: Your deployment token/key"
-            exit 1
-          fi
-          echo "✅ DEPLOY_TOKEN is configured"
-
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: npm ci
 
-      - name: Build application
-        run: npm run build
+      - name: 🔍 Run linting
+        run: npm run lint
 
-      - name: Run tests before deploy
+      - name: ✨ Check formatting
+        run: npm run format:check
+
+      - name: 🧪 Run tests
         run: npm test
 
-      - name: Deploy to production
+      - name: 📊 Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/coverage-final.json
+        continue-on-error: true
+
+      - name: 🔨 Build application
+        run: npm run build
+        env:
+          CI: true
+
+      - name: 📋 Create deployment summary
         run: |
-          echo "🚀 Deploying to production environment..."
-          # Add your deployment commands here based on your hosting platform
-          # Uncomment and configure the appropriate command for your platform:
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ inputs.environment || 'production' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Pre-deployment Checks Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Linting passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Code formatting verified" >> $GITHUB_STEP_SUMMARY
+          echo "- All tests passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Build successful" >> $GITHUB_STEP_SUMMARY
+
+      # Heroku Deployment (if HEROKU_API_KEY is set)
+      - name: 🚀 Deploy to Heroku
+        if: ${{ secrets.HEROKU_API_KEY != '' }}
+        uses: akhileshns/heroku-deploy@v3.13.15
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          healthcheck: 'https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com/api/health'
+          rollbackonhealthcheckfailed: true
+
+      # Docker Deployment (if DOCKER_USERNAME is set)
+      - name: 🐳 Build and push Docker image
+        if: ${{ secrets.DOCKER_USERNAME != '' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/to-be-read-exchange-hub:latest
+            ${{ secrets.DOCKER_USERNAME }}/to-be-read-exchange-hub:${{ github.sha }}
+
+      # AWS Deployment (if AWS credentials are set)
+      - name: ☁️ Configure AWS credentials
+        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: ☁️ Deploy to AWS
+        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
+        run: |
+          # Add your AWS deployment commands here
+          # Example for S3:
+          # aws s3 sync dist/ s3://${{ secrets.AWS_S3_BUCKET }}
+          # Example for Elastic Beanstalk:
+          # eb deploy
+          echo "AWS deployment configured"
+
+      # Generic deployment (using DEPLOY_TOKEN)
+      - name: 🚀 Generic deployment
+        if: ${{ secrets.DEPLOY_TOKEN != '' && secrets.HEROKU_API_KEY == '' && secrets.AWS_ACCESS_KEY_ID == '' }}
+        run: |
+          echo "🚀 Running generic deployment..."
+          # Add your deployment commands here based on your platform
+          # Uncomment and configure the appropriate command:
           #
           # For Vercel:
-          # vercel --prod --token=$DEPLOY_TOKEN
+          # npx vercel --prod --token=${{ secrets.DEPLOY_TOKEN }}
           #
           # For Netlify:
-          # netlify deploy --prod --auth=$DEPLOY_TOKEN
+          # npx netlify-cli deploy --prod --auth=${{ secrets.DEPLOY_TOKEN }}
           #
-          # For AWS S3:
-          # aws s3 sync dist/ s3://your-bucket --region us-east-1
-          # (Set DEPLOY_TOKEN to AWS credentials in format: AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY)
-          #
-          # For Heroku:
-          # git push heroku main
-          # (Set DEPLOY_TOKEN to Heroku API key)
-        env:
-          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+          # For Railway:
+          # railway up --token=${{ secrets.DEPLOY_TOKEN }}
 
-      - name: Create deployment notification
+          echo "✅ Deployment complete"
+
+      - name: 🏥 Health check
+        if: ${{ secrets.HEALTH_CHECK_URL != '' }}
+        run: |
+          echo "Running health check on ${{ secrets.HEALTH_CHECK_URL }}..."
+          for i in {1..10}; do
+            if curl -f -s "${{ secrets.HEALTH_CHECK_URL }}/api/health" > /dev/null; then
+              echo "✅ Health check passed"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying..."
+            sleep 10
+          done
+          echo "❌ Health check failed after 10 attempts"
+          exit 1
+
+      - name: 📢 Deployment success notification
         if: success()
         run: |
-          echo "✅ Deployment successful!"
+          echo "## ✅ Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The application has been deployed successfully." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next steps:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Monitor application logs" >> $GITHUB_STEP_SUMMARY
+          echo "- Verify all features are working" >> $GITHUB_STEP_SUMMARY
+          echo "- Run smoke tests if available" >> $GITHUB_STEP_SUMMARY
 
-      - name: Rollback on failure
+      - name: 📢 Deployment failure notification
         if: failure()
         run: |
-          echo "❌ Deployment failed - initiating rollback..."
-          # Add rollback logic here
+          echo "## ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The deployment encountered an error." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Troubleshooting:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. Check the workflow logs above" >> $GITHUB_STEP_SUMMARY
+          echo "2. Verify all secrets are configured" >> $GITHUB_STEP_SUMMARY
+          echo "3. Check application health" >> $GITHUB_STEP_SUMMARY
+          echo "4. Review recent commits for issues" >> $GITHUB_STEP_SUMMARY

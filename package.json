@@ -14,7 +14,14 @@
     "format:check": "prettier --check \"**/*.{js,json,md,yml,yaml}\"",
     "setup": "bash scripts/setup.sh",
     "db:init": "bash scripts/init-db.sh",
-    "verify": "npm run lint && npm run format:check && npm test"
+    "verify": "npm run lint && npm run format:check && npm test",
+    "docker:build": "docker build -t to-be-read-exchange-hub .",
+    "docker:run": "docker-compose up -d",
+    "docker:stop": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "deploy:heroku": "bash scripts/deploy-heroku.sh",
+    "deploy:aws": "bash scripts/deploy-aws.sh",
+    "deploy:docker": "bash scripts/deploy-docker.sh"
   },
   "keywords": [],
   "author": "",

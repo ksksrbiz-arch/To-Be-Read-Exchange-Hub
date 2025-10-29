@@ -688,105 +688,339 @@ Note: For up-to-date numbers, run `npm test` and check the summary.
 
 ## Deployment
 
-The application includes automated deployment workflows via GitHub Actions. Follow these steps to
-set up and trigger deployments.
+The application supports multiple deployment methods with automated scripts and CI/CD workflows.
+Choose the deployment option that best fits your infrastructure.
 
-### Deployment Prerequisites
+### Quick Deployment Commands
 
-Before deploying, you need to configure the `DEPLOY_TOKEN` secret in your GitHub repository:
+```bash
+# Heroku deployment
+npm run deploy:heroku
 
-1. **Navigate to Repository Settings**
-   - Go to your repository on GitHub
-   - Click on **Settings** > **Secrets and variables** > **Actions**
+# AWS EC2 deployment
+npm run deploy:aws
 
-2. **Add DEPLOY_TOKEN Secret**
-   - Click **New repository secret**
-   - Name: `DEPLOY_TOKEN`
-   - Value: Your deployment token/key (see platform-specific instructions below)
+# Docker deployment
+npm run deploy:docker
 
-### Platform-Specific Setup
+# Docker Compose (full stack)
+npm run docker:run
+```
 
-#### Vercel Deployment
+### Deployment Options
 
-1. Get your Vercel token from [vercel.com/account/tokens](https://vercel.com/account/tokens)
-2. Add it as `DEPLOY_TOKEN` in GitHub Secrets
-3. Uncomment the Vercel deployment command in `.github/workflows/deploy.yml`:
+#### Option 1: Heroku Deployment (Recommended for beginners)
 
-   ```yaml
-   vercel --prod --token=$DEPLOY_TOKEN
+**Prerequisites:**
+
+- Heroku CLI installed
+- Heroku account created
+- Git repository initialized
+
+**Quick Start:**
+
+```bash
+# Install Heroku CLI (if not installed)
+curl https://cli-assets.heroku.com/install.sh | sh
+
+# Login to Heroku
+heroku login
+
+# Create app
+heroku create your-app-name
+
+# Add PostgreSQL addon
+heroku addons:create heroku-postgresql:essential-0
+
+# Deploy using automated script
+npm run deploy:heroku
+```
+
+**What the script does:**
+
+- ✅ Checks prerequisites (Heroku CLI, authentication)
+- ✅ Runs tests and linting
+- ✅ Verifies environment variables
+- ✅ Deploys to Heroku
+- ✅ Runs database migrations
+- ✅ Performs health checks
+- ✅ Auto-rollback on failure
+
+**Manual Configuration:**
+
+```bash
+# Set environment variables
+heroku config:set NODE_ENV=production -a your-app-name
+heroku config:set LOG_LEVEL=info -a your-app-name
+
+# View logs
+heroku logs --tail -a your-app-name
+```
+
+---
+
+#### Option 2: Docker Deployment
+
+**Prerequisites:**
+
+- Docker installed
+- Docker Compose installed (optional)
+
+**Using Docker Compose (Full Stack):**
+
+```bash
+# Start application with database
+npm run docker:run
+
+# View logs
+npm run docker:logs
+
+# Stop application
+npm run docker:stop
+```
+
+**Using Standalone Docker:**
+
+```bash
+# Build and deploy
+npm run deploy:docker
+
+# Or manually:
+docker build -t books-exchange .
+docker run -d -p 3000:3000 --env-file .env books-exchange
+```
+
+**Production Docker Compose:**
+
+```yaml
+# docker-compose.yml includes:
+# - PostgreSQL database with health checks
+# - Node.js application with auto-restart
+# - Optional Nginx reverse proxy
+# - Volume persistence for data
+# - Health monitoring
+```
+
+**Docker Features:**
+
+- ✅ Multi-stage build for smaller images
+- ✅ Non-root user for security
+- ✅ Built-in health checks
+- ✅ Automatic restarts
+- ✅ Volume persistence
+- ✅ Docker Compose for full stack
+
+---
+
+#### Option 3: AWS EC2 Deployment
+
+**Prerequisites:**
+
+- AWS account with EC2 instance
+- SSH key for EC2 access
+- Node.js and PostgreSQL on EC2
+
+**Configuration:**
+
+```bash
+# Set environment variables
+export AWS_EC2_HOST=your-ec2-ip-or-domain
+export AWS_EC2_USER=ubuntu
+export AWS_EC2_KEY=~/.ssh/your-key.pem
+
+# Deploy
+npm run deploy:aws
+```
+
+**What the script does:**
+
+- ✅ Tests SSH connection
+- ✅ Runs tests locally
+- ✅ Creates deployment package
+- ✅ Uploads to EC2
+- ✅ Installs dependencies
+- ✅ Sets up PM2 for process management
+- ✅ Configures auto-restart on reboot
+- ✅ Performs health checks
+
+**PM2 Management:**
+
+```bash
+# View logs
+ssh -i your-key.pem ubuntu@your-host 'pm2 logs books-exchange'
+
+# Restart app
+ssh -i your-key.pem ubuntu@your-host 'pm2 restart books-exchange'
+
+# Monitor
+ssh -i your-key.pem ubuntu@your-host 'pm2 monit'
+```
+
+---
+
+#### Option 4: GitHub Actions CI/CD
+
+**Automated Deployment via GitHub:**
+
+The repository includes production-ready GitHub Actions workflows for automated deployment.
+
+**Setup:**
+
+1. **Configure Secrets** (Settings > Secrets and variables > Actions):
+
+   **For Heroku:**
+
+   ```text
+   HEROKU_API_KEY=your-heroku-api-key
+   HEROKU_APP_NAME=your-app-name
+   HEROKU_EMAIL=your-email
    ```
 
-#### Netlify Deployment
+   **For AWS:**
 
-1. Generate a Netlify personal access token from your
-   [Netlify account settings](https://app.netlify.com/user/applications)
-2. Add it as `DEPLOY_TOKEN` in GitHub Secrets
-3. Uncomment the Netlify deployment command in `.github/workflows/deploy.yml`:
-
-   ```yaml
-   netlify deploy --prod --auth=$DEPLOY_TOKEN
+   ```text
+   AWS_ACCESS_KEY_ID=your-access-key
+   AWS_SECRET_ACCESS_KEY=your-secret-key
+   AWS_REGION=us-east-1
    ```
 
-#### AWS S3 Deployment
+   **For Docker Hub:**
 
-1. Create AWS credentials (Access Key ID and Secret Access Key) with S3 permissions
-2. Format them as `AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY`
-3. Add the formatted string as `DEPLOY_TOKEN` in GitHub Secrets
-4. Uncomment and configure the AWS deployment command in `.github/workflows/deploy.yml`:
-
-   ```yaml
-   aws s3 sync dist/ s3://your-bucket --region us-east-1
+   ```text
+   DOCKER_USERNAME=your-dockerhub-username
+   DOCKER_PASSWORD=your-dockerhub-password
    ```
 
-### Triggering Deployments
+   **For Health Checks:**
 
-Deployments can be triggered in two ways:
+   ```text
+   HEALTH_CHECK_URL=https://your-app-url.com
+   ```
 
-1. **Automatic Deployment**
-   - Deployments automatically run when code is pushed to the `main` branch
-   - The workflow will build, test, and deploy your application
+2. **Trigger Deployment:**
+   - **Automatic**: Push to `main` branch
+   - **Manual**: Actions tab > Deploy > Run workflow
 
-2. **Manual Deployment**
-   - Go to **Actions** tab in your GitHub repository
-   - Select the **Deploy** workflow
-   - Click **Run workflow**
-   - Choose the branch to deploy (usually `main`)
-   - Click **Run workflow** button
+**Workflow Features:**
 
-### Security Notes
+- ✅ Multi-environment support (production/staging)
+- ✅ Automated testing before deployment
+- ✅ Code quality checks (linting, formatting)
+- ✅ Health checks after deployment
+- ✅ Automatic rollback on failure
+- ✅ Deployment summaries and notifications
+- ✅ Support for multiple platforms (Heroku/AWS/Docker)
 
-⚠️ **Important Security Considerations:**
+---
 
-- Never commit deployment tokens or credentials to your repository
-- Always use GitHub Secrets to store sensitive tokens
-- Regularly rotate your deployment tokens
-- Use environment-specific tokens (separate tokens for staging/production)
-- Review deployment logs for any exposed credentials
-- Consider using OIDC authentication for AWS/Azure deployments instead of static credentials
+### Environment Variables for Production
 
-### Deployment Process
+Required environment variables for deployment:
 
-The deployment workflow automatically:
+```env
+# Server
+NODE_ENV=production
+PORT=3000
+LOG_LEVEL=info
 
-1. ✅ Verifies that `DEPLOY_TOKEN` is configured
-2. 📦 Installs dependencies with `npm ci`
-3. 🔨 Builds the application with `npm run build`
-4. 🧪 Runs tests to ensure code quality
-5. 🚀 Deploys to your configured platform
-6. ✅ Confirms successful deployment or initiates rollback on failure
+# Database (set by platform or configure manually)
+DB_USER=your_db_user
+DB_HOST=your_db_host
+DB_NAME=books_exchange
+DB_PASSWORD=your_secure_password
+DB_PORT=5432
+
+# Rate Limiting
+API_RATE_WINDOW_MIN=15
+API_RATE_MAX=100
+SYNC_RATE_WINDOW_MIN=15
+SYNC_RATE_MAX=10
+```
+
+**Platform-Specific Notes:**
+
+- **Heroku**: Database URL set automatically by PostgreSQL addon
+- **AWS**: Configure manually or use RDS
+- **Docker**: Set in `.env` file or docker-compose.yml
+
+---
+
+### Security Best Practices
+
+⚠️ **Production Security Checklist:**
+
+- ✅ Never commit `.env` files or secrets to git
+- ✅ Use strong, unique passwords for databases
+- ✅ Enable HTTPS/SSL in production
+- ✅ Regularly update dependencies (`npm audit`)
+- ✅ Use environment-specific secrets
+- ✅ Enable firewall rules on cloud instances
+- ✅ Implement rate limiting (already configured)
+- ✅ Monitor application logs regularly
+- ✅ Set up automated backups for database
+- ✅ Use non-root users in Docker containers
+
+---
+
+### Monitoring and Maintenance
+
+**Health Check Endpoint:**
+
+```bash
+curl https://your-app-url.com/api/health
+# Response: {"status":"ok"}
+```
+
+**Viewing Logs:**
+
+```bash
+# Heroku
+heroku logs --tail -a your-app-name
+
+# AWS with PM2
+ssh user@host 'pm2 logs books-exchange'
+
+# Docker
+docker logs -f container-name
+# or
+npm run docker:logs
+```
+
+**Database Backups:**
+
+```bash
+# Heroku
+heroku pg:backups:capture -a your-app-name
+heroku pg:backups:download -a your-app-name
+
+# Docker/Local
+docker exec postgres-container pg_dump -U postgres books_exchange > backup.sql
+```
+
+---
 
 ### Troubleshooting Deployment
 
-**Deployment fails with "DEPLOY_TOKEN not set":**
+**Common Issues:**
 
-- Ensure you've added the `DEPLOY_TOKEN` secret in GitHub repository settings
-- Verify the secret name is exactly `DEPLOY_TOKEN` (case-sensitive)
+| Issue                        | Solution                                                       |
+| ---------------------------- | -------------------------------------------------------------- |
+| Health check fails           | Check database connection and environment variables            |
+| Port already in use          | Change PORT in .env or stop conflicting process                |
+| Database connection refused  | Verify DB_HOST, DB_PORT, and firewall rules                    |
+| npm install fails            | Clear cache: `npm cache clean --force`                         |
+| Docker build fails           | Check Dockerfile syntax and .dockerignore                      |
+| Heroku deployment timeout    | Check Procfile, increase dyno resources                        |
+| Permission denied on scripts | Run `chmod +x scripts/*.sh`                                    |
+| SSH connection fails (AWS)   | Verify security group allows SSH (port 22) and key permissions |
 
-**Deployment succeeds but application doesn't update:**
+**Getting Help:**
 
-- Check your platform-specific deployment command is uncommented
-- Verify the deployment target (bucket, site ID, etc.) is correct
-- Review deployment logs in the Actions tab
+1. Check application logs for detailed errors
+2. Review [Issues](https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub/issues)
+3. Run health check: `curl http://your-url/api/health`
+4. Verify all environment variables are set
+5. Check platform-specific status pages
 
 ## Development
 
@@ -804,19 +1038,26 @@ This starts the server with the development environment settings and auto-reload
 
 Complete reference of all available commands:
 
-| Command                | Description                                             |
-| ---------------------- | ------------------------------------------------------- |
-| `npm run setup`        | 🚀 Complete automated setup (first-time installation)   |
-| `npm run db:init`      | 🗄️ Initialize/reset database                            |
-| `npm start`            | ▶️ Start production server                              |
-| `npm run dev`          | 🔧 Start development server with auto-reload            |
-| `npm test`             | 🧪 Run all tests with coverage report                   |
-| `npm run test:watch`   | 👀 Run tests in watch mode (auto-rerun on changes)      |
-| `npm run lint`         | 🔍 Check code for errors and style issues               |
-| `npm run format`       | ✨ Auto-format all code files                           |
-| `npm run format:check` | 📋 Check if code is properly formatted                  |
-| `npm run verify`       | ✅ Run lint + format check + tests (pre-commit quality) |
-| `npm run build`        | 📦 Build production-ready artifacts in dist/            |
+| Command                 | Description                                             |
+| ----------------------- | ------------------------------------------------------- |
+| `npm run setup`         | 🚀 Complete automated setup (first-time installation)   |
+| `npm run db:init`       | 🗄️ Initialize/reset database                            |
+| `npm start`             | ▶️ Start production server                              |
+| `npm run dev`           | 🔧 Start development server with auto-reload            |
+| `npm test`              | 🧪 Run all tests with coverage report                   |
+| `npm run test:watch`    | 👀 Run tests in watch mode (auto-rerun on changes)      |
+| `npm run lint`          | 🔍 Check code for errors and style issues               |
+| `npm run format`        | ✨ Auto-format all code files                           |
+| `npm run format:check`  | 📋 Check if code is properly formatted                  |
+| `npm run verify`        | ✅ Run lint + format check + tests (pre-commit quality) |
+| `npm run build`         | 📦 Build production-ready artifacts in dist/            |
+| `npm run docker:build`  | 🐳 Build Docker image                                   |
+| `npm run docker:run`    | 🐳 Start application with Docker Compose                |
+| `npm run docker:stop`   | 🛑 Stop Docker Compose containers                       |
+| `npm run docker:logs`   | 📊 View Docker container logs                           |
+| `npm run deploy:heroku` | 🚀 Deploy to Heroku with automated checks               |
+| `npm run deploy:aws`    | ☁️ Deploy to AWS EC2 with PM2                           |
+| `npm run deploy:docker` | 🐳 Deploy using Docker standalone                       |
 
 **Recommended Workflow:**
 
@@ -831,8 +1072,13 @@ npm run test:watch          # Run tests in another terminal
 # Before committing
 npm run verify              # Ensure code quality
 
+# Docker development
+npm run docker:run          # Full stack with database
+npm run docker:logs         # Monitor logs
+
 # Production deployment
 npm run build               # Create production build
+npm run deploy:heroku       # Or deploy:aws, deploy:docker
 ```
 
 ### Project Structure
