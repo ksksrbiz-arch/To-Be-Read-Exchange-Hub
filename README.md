@@ -113,20 +113,37 @@ Copy the example environment file and customize it with your settings:
 cp .env.example .env
 ```
 
-Open the `.env` file and update the following variables:
+Open the `.env` file and update the variables according to your environment. The `.env.example` file
+contains all required configuration options with sensible defaults.
+
+**Required Configuration:**
 
 ```env
 # Server Configuration
 PORT=3000                    # Port for the application
 NODE_ENV=development         # Environment: development or production
+LOG_LEVEL=info               # Logging level (error, warn, info, debug)
+
+# Rate Limiting
+API_RATE_WINDOW_MIN=15       # API rate limit window in minutes
+API_RATE_MAX=100             # Maximum API requests per IP per window
+SYNC_RATE_WINDOW_MIN=15      # Sync rate limit window in minutes
+SYNC_RATE_MAX=10             # Maximum sync requests per window
 
 # Database Configuration
 DB_USER=postgres             # Your PostgreSQL username
 DB_HOST=localhost            # Database host
 DB_NAME=books_exchange       # Database name
-DB_PASSWORD=your_password    # Your PostgreSQL password
+DB_PASSWORD=your_password    # Your PostgreSQL password (⚠️ CHANGE THIS!)
 DB_PORT=5432                 # PostgreSQL port (default: 5432)
 ```
+
+**Important Notes:**
+
+- ⚠️ **Security:** Always change `DB_PASSWORD` from the default value
+- 📋 See `.env.example` for the complete list of configuration options
+- 🔒 Never commit your `.env` file to version control (it's in `.gitignore`)
+- 🚀 For production, set `NODE_ENV=production` and use stronger passwords
 
 ### 5. Start the Application
 
