@@ -9,6 +9,7 @@
 ## Test Results Summary
 
 ### ✅ Docker Build Test: PASSED
+
 - **Image Name:** to-be-read-exchange-hub:latest
 - **Image Size:** 146 MB (optimized)
 - **Build Time:** ~13 seconds
@@ -20,6 +21,7 @@
   - Minimal Alpine base image
 
 ### ✅ Docker Compose Validation: PASSED
+
 - PostgreSQL service configured with health checks
 - Application service with auto-restart
 - Volume persistence for database
@@ -27,6 +29,7 @@
 - Environment variable support
 
 ### ✅ GitHub Actions Workflows: VALIDATED
+
 - **ci.yml** - Continuous Integration (4.5 KB)
   - Code quality checks (ESLint, Prettier)
   - Multi-version testing (Node 18.x, 20.x)
@@ -47,6 +50,7 @@
   - OWASP dependency checks
 
 ### ✅ Code Quality: VERIFIED
+
 - Linting: 0 errors, 0 warnings
 - Formatting: All files formatted
 - Tests: 39 passed, 86.34% coverage
@@ -59,6 +63,7 @@
 ### 1️⃣ Docker Compose (Local/Testing)
 
 **Quick Start:**
+
 ```bash
 # Setup
 cp .env.example .env
@@ -84,6 +89,7 @@ npm run docker:stop
 ### 2️⃣ Heroku (Production - PaaS)
 
 **Prerequisites:**
+
 ```bash
 # Install Heroku CLI
 curl https://cli-assets.heroku.com/install.sh | sh
@@ -97,6 +103,7 @@ heroku addons:create heroku-postgresql:essential-0
 ```
 
 **Deploy:**
+
 ```bash
 # Automated deployment
 npm run deploy:heroku
@@ -113,6 +120,7 @@ npm run deploy:heroku
 ### 3️⃣ AWS EC2 (Production - IaaS)
 
 **Prerequisites:**
+
 ```bash
 # Set environment variables
 export AWS_EC2_HOST=your-ec2-ip-or-domain
@@ -121,12 +129,14 @@ export AWS_EC2_KEY=~/.ssh/your-key.pem
 ```
 
 **Deploy:**
+
 ```bash
 # Automated deployment with PM2
 npm run deploy:aws
 ```
 
 **Features:**
+
 - PM2 process management
 - Auto-restart on server reboot
 - Zero-downtime deployments
@@ -139,6 +149,7 @@ npm run deploy:aws
 ### 4️⃣ Docker Hub + Any Host (Production)
 
 **Deploy:**
+
 ```bash
 # Build and deploy standalone
 npm run deploy:docker
@@ -155,15 +166,18 @@ npm run deploy:docker
 ### 5️⃣ GitHub Actions Auto-Deploy
 
 **Setup:**
+
 1. Go to: Settings > Secrets and variables > Actions
 2. Add required secrets for your platform
 3. Push to `main` branch or manually trigger workflow
 
 **Workflow triggers deployment on:**
+
 - Push to main branch (automatic)
 - Manual workflow dispatch (manual)
 
 **Features:**
+
 - Pre-deployment quality checks
 - Multi-platform support
 - Health checks
@@ -199,14 +213,17 @@ SYNC_RATE_MAX=10
 ### Platform-Specific Setup
 
 **Heroku:**
+
 - Database URL automatically set by PostgreSQL addon
 - Use `heroku config:set` for other variables
 
 **AWS:**
+
 - Configure manually or use RDS
 - Store in `.env` file on EC2 instance
 
 **Docker:**
+
 - Use `.env` file or `docker-compose.yml`
 - Mount secrets via Docker secrets (production)
 
@@ -258,12 +275,14 @@ npm run db:init        # Initialize database
 ## Monitoring and Maintenance
 
 ### Health Check
+
 ```bash
 curl http://your-url/api/health
 # Expected: {"status":"ok"}
 ```
 
 ### View Logs
+
 ```bash
 # Heroku
 heroku logs --tail -a your-app-name
@@ -276,6 +295,7 @@ npm run docker:logs
 ```
 
 ### Database Backups
+
 ```bash
 # Heroku
 heroku pg:backups:capture
@@ -326,4 +346,4 @@ docker exec postgres-container pg_dump -U postgres books_exchange > backup.sql
 
 ---
 
-*Last updated: October 29, 2025*
+_Last updated: October 29, 2025_
