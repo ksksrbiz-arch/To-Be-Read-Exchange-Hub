@@ -11,12 +11,27 @@ function handleValidationErrors(req, res, next) {
 
 // POST /api/books
 const validateCreateBook = [
-  body('isbn').optional().isString().withMessage('isbn must be a string'),
-  body('title').optional().isString().withMessage('title must be a string'),
+  // Require either isbn or title to be present
+  body().custom((value, { req }) => {
+    if (!req.body.isbn && !req.body.title) {
+      throw new Error('Either ISBN or title is required');
+    }
+    return true;
+  }),
+  body('isbn')
+    .optional()
+    .isString()
+    .matches(/^[0-9]{10}([0-9]{3})?$/)
+    .withMessage('isbn must be 10 or 13 digits'),
+  body('title')
+    .optional()
+    .isString()
+    .isLength({ max: 500 })
+    .withMessage('title must be at most 500 characters'),
   body('author').optional().isString().withMessage('author must be a string'),
-  body('quantity').optional().isInt({ min: 1 }).withMessage('quantity must be a positive integer'),
+  body('quantity').isInt({ min: 1 }).withMessage('quantity must be a positive integer'),
   body('shelf_location').optional().isString().withMessage('shelf_location must be a string'),
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 // PUT /api/books/:id
@@ -30,7 +45,7 @@ const validateUpdateBook = [
   body('section').optional().isString(),
   body('quantity').optional().isInt(),
   body('available_quantity').optional().isInt(),
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 // POST /api/sync/pingo
@@ -41,12 +56,12 @@ const validateSyncPingo = [
   body('books.*.title').optional().isString(),
   body('books.*.author').optional().isString(),
   body('books.*.quantity').optional().isInt({ min: 1 }),
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 module.exports = {
   validateCreateBook,
   validateUpdateBook,
   validateSyncPingo,
-  handleValidationErrors
+  handleValidationErrors,
 };

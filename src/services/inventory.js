@@ -75,7 +75,8 @@ async function calculateOptimalLocation(bookData) {
   // Query database to find the next available section in this shelf
   try {
     const result = await pool.query(
-      'SELECT COALESCE(MAX(CAST(section AS INTEGER)), 0) + 1 as next_section FROM books WHERE shelf_location = $1 AND section ~ \'^[0-9]+$\'',
+      // eslint-disable-next-line quotes
+      "SELECT COALESCE(MAX(CAST(section AS INTEGER)), 0) + 1 as next_section FROM books WHERE shelf_location = $1 AND section ~ '^[0-9]+$'",
       [shelf]
     );
 
@@ -84,7 +85,7 @@ async function calculateOptimalLocation(bookData) {
 
     return {
       shelf_location: shelf,
-      section: sectionValue.toString()
+      section: sectionValue.toString(),
     };
   } catch (error) {
     const logger = require('../utils/logger');
@@ -92,7 +93,7 @@ async function calculateOptimalLocation(bookData) {
     // Fallback to default location
     return {
       shelf_location: shelf,
-      section: '1'
+      section: '1',
     };
   }
 }
@@ -132,5 +133,5 @@ module.exports = {
   determineStorageLocation,
   parseLocation,
   calculateOptimalLocation,
-  updateInventory
+  updateInventory,
 };

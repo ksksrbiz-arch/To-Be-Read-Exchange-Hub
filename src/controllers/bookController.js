@@ -15,7 +15,7 @@ async function createBook(req, res) {
   try {
     // Enrich book data if ISBN is provided
     let bookData = { isbn, title, author };
-    
+
     if (isbn) {
       // enrichment can return null when APIs fail — guard against that
       const enrichedData = (await enrichBookData(isbn)) || {};
@@ -25,7 +25,7 @@ async function createBook(req, res) {
         author: bookData.author || enrichedData.author || null,
         publisher: enrichedData.publisher || null,
         description: enrichedData.description || null,
-        cover_url: enrichedData.cover_url || null
+        cover_url: enrichedData.cover_url || null,
       };
     }
 
@@ -51,13 +51,13 @@ async function createBook(req, res) {
         bookData.cover_url,
         location.shelf_location,
         location.section,
-        quantity || 1
+        quantity || 1,
       ]
     );
 
     res.status(201).json({
       success: true,
-      book: result.rows[0]
+      book: result.rows[0],
     });
   } catch (error) {
     const logger = require('../utils/logger');
@@ -85,14 +85,14 @@ async function getBooks(req, res) {
  */
 async function getBookById(req, res) {
   const { id } = req.params;
-  
+
   try {
     const result = await pool.query('SELECT * FROM books WHERE id = $1', [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Book not found' });
     }
-    
+
     res.json({ success: true, book: result.rows[0] });
   } catch (error) {
     const logger = require('../utils/logger');
@@ -107,27 +107,36 @@ async function getBookById(req, res) {
 async function updateBook(req, res) {
   const { id } = req.params;
   const updates = req.body;
-  
-  const allowedFields = ['title', 'author', 'publisher', 'description', 'shelf_location', 'section', 'quantity', 'available_quantity'];
-  const fields = Object.keys(updates).filter(key => allowedFields.includes(key));
-  
+
+  const allowedFields = [
+    'title',
+    'author',
+    'publisher',
+    'description',
+    'shelf_location',
+    'section',
+    'quantity',
+    'available_quantity',
+  ];
+  const fields = Object.keys(updates).filter((key) => allowedFields.includes(key));
+
   if (fields.length === 0) {
     return res.status(400).json({ error: 'No valid fields to update' });
   }
-  
+
   const setClause = fields.map((field, index) => `${field} = $${index + 2}`).join(', ');
-  const values = [id, ...fields.map(field => updates[field])];
-  
+  const values = [id, ...fields.map((field) => updates[field])];
+
   try {
     const result = await pool.query(
       `UPDATE books SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
       values
     );
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Book not found' });
     }
-    
+
     res.json({ success: true, book: result.rows[0] });
   } catch (error) {
     const logger = require('../utils/logger');
@@ -141,14 +150,14 @@ async function updateBook(req, res) {
  */
 async function deleteBook(req, res) {
   const { id } = req.params;
-  
+
   try {
     const result = await pool.query('DELETE FROM books WHERE id = $1 RETURNING *', [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Book not found' });
     }
-    
+
     res.json({ success: true, message: 'Book deleted successfully' });
   } catch (error) {
     const logger = require('../utils/logger');
@@ -162,5 +171,5 @@ module.exports = {
   getBooks,
   getBookById,
   updateBook,
-  deleteBook
+  deleteBook,
 };

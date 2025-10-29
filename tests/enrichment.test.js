@@ -1,4 +1,8 @@
-const { enrichBookData, fetchFromOpenLibrary, fetchFromGoogleBooks } = require('../src/services/enrichment');
+const {
+  enrichBookData,
+  fetchFromOpenLibrary,
+  fetchFromGoogleBooks,
+} = require('../src/services/enrichment');
 const axios = require('axios');
 
 jest.mock('axios');
@@ -13,12 +17,12 @@ describe('Enrichment Service', () => {
       const mockOpenLibraryResponse = {
         data: {
           'ISBN:9780747532743': {
-            title: 'Harry Potter and the Philosopher\'s Stone',
+            title: "Harry Potter and the Philosopher's Stone",
             authors: [{ name: 'J.K. Rowling' }],
             publishers: [{ name: 'Bloomsbury' }],
-            cover: { large: 'http://covers.openlibrary.org/b/isbn/9780747532743-L.jpg' }
-          }
-        }
+            cover: { large: 'http://covers.openlibrary.org/b/isbn/9780747532743-L.jpg' },
+          },
+        },
       };
 
       const mockGoogleBooksResponse = {
@@ -26,17 +30,18 @@ describe('Enrichment Service', () => {
           items: [
             {
               volumeInfo: {
-                title: 'Harry Potter and the Philosopher\'s Stone',
+                title: "Harry Potter and the Philosopher's Stone",
                 authors: ['J.K. Rowling'],
                 publisher: 'Bloomsbury Publishing',
-                description: 'A young wizard\'s journey begins...',
+                description: "A young wizard's journey begins...",
                 imageLinks: {
-                  thumbnail: 'http://books.google.com/books/content?id=wrOQLV6xB-wC&printsec=frontcover&img=1&zoom=1'
-                }
-              }
-            }
-          ]
-        }
+                  thumbnail:
+                    'http://books.google.com/books/content?id=wrOQLV6xB-wC&printsec=frontcover&img=1&zoom=1',
+                },
+              },
+            },
+          ],
+        },
       };
 
       axios.get
@@ -72,9 +77,9 @@ describe('Enrichment Service', () => {
             title: 'Test Book',
             authors: [{ name: 'Test Author' }],
             publishers: [{ name: 'Test Publisher' }],
-            cover: { large: 'http://test.com/cover.jpg' }
-          }
-        }
+            cover: { large: 'http://test.com/cover.jpg' },
+          },
+        },
       };
 
       axios.get.mockResolvedValue(mockResponse);
@@ -107,11 +112,11 @@ describe('Enrichment Service', () => {
                 authors: ['Test Author'],
                 publisher: 'Test Publisher',
                 description: 'Test description',
-                imageLinks: { thumbnail: 'http://test.com/cover.jpg' }
-              }
-            }
-          ]
-        }
+                imageLinks: { thumbnail: 'http://test.com/cover.jpg' },
+              },
+            },
+          ],
+        },
       };
 
       axios.get.mockResolvedValue(mockResponse);

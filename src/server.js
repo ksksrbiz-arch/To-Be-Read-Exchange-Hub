@@ -3,12 +3,18 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
+const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
 
 const bookRoutes = require('./routes/books');
 const syncRoutes = require('./routes/sync');
+const healthDbRoute = require('./routes/healthDb');
+const swaggerSpec = require('./config/swagger');
 
 const app = express();
+
+// Always trust proxy for correct client IP detection behind reverse proxy (Docker, etc)
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 
 // Rate limiting middleware (configurable via env)
@@ -38,24 +44,70 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '../public')));
+// Disable caching for all responses in development
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+});
+
+// Serve static files with cache control
+app.use(express.static(path.join(__dirname, '../public'), {
+  maxAge: 0, // Disable caching in development
+  etag: false,
+  lastModified: false
+}));
 
 // API Routes with rate limiting
 app.use('/api/books', apiLimiter, bookRoutes);
 app.use('/api/sync', syncLimiter, syncRoutes);
+app.use('/api/health/db', healthDbRoute);
+
+// API Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'To-Be-Read Exchange Hub API',
+}));
 
 // Root route
 app.get('/', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Health check
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     tags:
+ *       - Health
+ *     summary: Basic health check
+ *     description: Returns server status and current timestamp
+ *     responses:
+ *       200:
+ *         description: Server is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ */
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Error handling middleware
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   const logger = require('./utils/logger');
   logger.error('Unhandled error: %s', err.stack || err);
