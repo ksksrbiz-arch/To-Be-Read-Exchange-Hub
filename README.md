@@ -147,7 +147,7 @@ DB_PORT=5432                 # PostgreSQL port (default: 5432)
 
 ### 5. Start the Application
 
-Start the server:
+Start the server in production mode:
 
 ```bash
 npm start
@@ -155,11 +155,51 @@ npm start
 
 The application will be available at `http://localhost:3000`
 
-For development mode with auto-reload:
+**Expected output:**
+
+```text
+Server running on port 3000
+Database connected successfully
+```
+
+**Development Mode:**
+
+For development with auto-reload on file changes:
 
 ```bash
 npm run dev
 ```
+
+**Additional Commands:**
+
+```bash
+# Run tests
+npm test
+
+# Run tests in watch mode (during development)
+npm run test:watch
+
+# Check code formatting
+npm run format:check
+
+# Auto-format code
+npm run format
+
+# Lint code for errors
+npm run lint
+
+# Build production artifacts
+npm run build
+```
+
+**Verify Installation:**
+
+Open your browser and navigate to:
+
+- **Web Interface:** `http://localhost:3000`
+- **Health Check:** `http://localhost:3000/api/health` (should return `{"status":"ok"}`)
+
+If you see the web interface, you're all set! 🎉
 
 ## Configuration
 
