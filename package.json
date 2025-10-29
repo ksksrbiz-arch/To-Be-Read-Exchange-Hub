@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Smart inventory management system for book exchange",
   "main": "src/server.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
