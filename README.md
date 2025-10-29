@@ -28,9 +28,10 @@ storage allocation.
   names
 - **Data Enrichment**: Fetches book metadata (cover, description, publisher) from Open Library and
   Google Books APIs
+- **Bulk Operations**: Import, update, and delete books in batches (CSV/JSON support, up to 1000 books)
 - **Pingo Sync**: Import and sync inventory data from Pingo systems
 - **Manual Override**: Option to manually specify shelf/section locations
-- **RESTful API**: Comprehensive API for book management
+- **RESTful API**: Comprehensive API with interactive Swagger documentation
 - **Responsive UI**: Modern web interface for managing inventory
 
 ## Quick Start
@@ -578,6 +579,205 @@ Retrieves the history of all sync operations.
 ```bash
 curl http://localhost:3000/api/sync/history
 ```
+
+---
+
+### Bulk Operations API
+
+#### Bulk Import Books
+
+**POST** `/api/books/bulk`
+
+Import multiple books at once from CSV file or JSON array. Perfect for initial inventory setup or large updates.
+
+**Features:**
+- Support for CSV file upload or JSON array
+- Automatic ISBN enrichment for all books
+- Auto-assigned storage locations
+- Transaction-safe (rollback on critical failure)
+- Partial success support (continues processing even if some books fail)
+- Maximum 1000 books per batch
+
+**Request Body (JSON):**
+
+```json
+{
+  "books": [
+    {
+      "isbn": "9780451524935",
+      "quantity": 5
+    },
+    {
+      "title": "The Great Gatsby",
+      "author": "F. Scott Fitzgerald",
+      "quantity": 3,
+      "shelf_location": "A-5"
+    }
+  ]
+}
+```
+
+**Request (CSV File):**
+
+```bash
+curl -X POST http://localhost:3000/api/books/bulk \
+  -F "file=@books.csv"
+```
+
+**CSV Format:**
+
+```csv
+isbn,title,author,quantity,shelf_location
+9780451524935,1984,George Orwell,5,
+9780061120084,To Kill a Mockingbird,Harper Lee,3,A-5
+```
+
+**Success Response (201):**
+
+```json
+{
+  "success": true,
+  "message": "Imported 2 of 2 books",
+  "total": 2,
+  "successful": 2,
+  "failed": 0,
+  "errors": [],
+  "books": [
+    {
+      "id": 1,
+      "isbn": "9780451524935",
+      "title": "1984",
+      // ... other fields
+    }
+  ]
+}
+```
+
+**Partial Success Response (207):**
+
+```json
+{
+  "success": false,
+  "message": "Imported 1 of 2 books",
+  "total": 2,
+  "successful": 1,
+  "failed": 1,
+  "errors": [
+    {
+      "row": 2,
+      "book": { "isbn": "123", "title": "Bad Book" },
+      "error": "Valid quantity (>=1) is required"
+    }
+  ],
+  "books": [...]
+}
+```
+
+---
+
+#### Bulk Update Books
+
+**PUT** `/api/books/bulk`
+
+Update multiple books in a single request. Maximum 500 updates per batch.
+
+**Request Body:**
+
+```json
+{
+  "updates": [
+    {
+      "id": 1,
+      "fields": {
+        "quantity": 10,
+        "shelf_location": "A-5"
+      }
+    },
+    {
+      "id": 2,
+      "fields": {
+        "author": "Updated Author Name",
+        "available_quantity": 5
+      }
+    }
+  ]
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "Updated 2 of 2 books",
+  "total": 2,
+  "successful": 2,
+  "failed": 0,
+  "errors": []
+}
+```
+
+**Example:**
+
+```bash
+curl -X PUT http://localhost:3000/api/books/bulk \
+  -H "Content-Type: application/json" \
+  -d '{
+    "updates": [
+      {"id": 1, "fields": {"quantity": 10}},
+      {"id": 2, "fields": {"title": "New Title"}}
+    ]
+  }'
+```
+
+---
+
+#### Bulk Delete Books
+
+**DELETE** `/api/books/bulk`
+
+Delete multiple books by ID. Maximum 500 deletions per batch.
+
+**Request Body:**
+
+```json
+{
+  "ids": [1, 2, 3, 4, 5]
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "Deleted 5 of 5 books",
+  "deleted": 5,
+  "total": 5
+}
+```
+
+**Partial Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "Deleted 3 of 5 books",
+  "deleted": 3,
+  "total": 5,
+  "notFound": [4, 5]
+}
+```
+
+**Example:**
+
+```bash
+curl -X DELETE http://localhost:3000/api/books/bulk \
+  -H "Content-Type: application/json" \
+  -d '{"ids": [1, 2, 3]}'
+```
+
+---
 
 ## Smart Inventory Logic
 
