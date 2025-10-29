@@ -7,7 +7,7 @@ const logger = createLogger({
     format.timestamp(),
     format.errors({ stack: true }),
     format.splat(),
-    format.printf(({ timestamp, level, message, stack, ...meta }) => {
+    format.printf(({ timestamp, level, message, stack /*, ...meta */ }) => {
       const base = `${timestamp} [${level}] ${message}`;
       return stack ? `${base}\n${stack}` : base;
     })

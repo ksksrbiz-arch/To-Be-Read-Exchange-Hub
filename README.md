@@ -46,6 +46,9 @@ npm install
 createdb books_exchange
 psql books_exchange < src/config/schema.sql
 
+# Or run the helper script (Linux/macOS):
+bash scripts/init-db.sh
+
 # 4. Configure environment
 cp .env.example .env
 # Edit .env with your database credentials
@@ -60,7 +63,7 @@ Visit `http://localhost:3000` to access the application.
 
 Before you begin, ensure you have the following installed:
 
-- **Node.js** (v14 or higher) - [Download here](https://nodejs.org/)
+- **Node.js** (v18 or higher) - [Download here](https://nodejs.org/) (tested on Node 20 LTS)
 - **PostgreSQL** (v12 or higher) - [Download here](https://www.postgresql.org/download/)
 - **npm** (comes with Node.js)
 
@@ -142,15 +145,20 @@ npm run dev
 
 ### Environment Variables
 
-| Variable     | Description                           | Default         |
-|-------------|---------------------------------------|-----------------|
-| `PORT`      | Application server port               | `3000`          |
-| `NODE_ENV`  | Environment mode                      | `development`   |
-| `DB_USER`   | PostgreSQL username                   | `postgres`      |
-| `DB_HOST`   | Database host address                 | `localhost`     |
-| `DB_NAME`   | Database name                         | `books_exchange`|
-| `DB_PASSWORD`| PostgreSQL password                  | `postgres`      |
-| `DB_PORT`   | PostgreSQL port                       | `5432`          |
+| Variable               | Description                                   | Default         |
+|------------------------|-----------------------------------------------|-----------------|
+| `PORT`                 | Application server port                       | `3000`          |
+| `NODE_ENV`             | Environment mode                              | `development`   |
+| `LOG_LEVEL`            | Logger level (`error`, `warn`, `info`, etc.)  | `info`          |
+| `API_RATE_WINDOW_MIN`  | API rate limit window (minutes)               | `15`            |
+| `API_RATE_MAX`         | Max API requests per IP per window            | `100`           |
+| `SYNC_RATE_WINDOW_MIN` | Sync rate limit window (minutes)              | `15`            |
+| `SYNC_RATE_MAX`        | Max sync requests per window                  | `10`            |
+| `DB_USER`              | PostgreSQL username                           | `postgres`      |
+| `DB_HOST`              | Database host address                         | `localhost`     |
+| `DB_NAME`              | Database name                                  | `books_exchange`|
+| `DB_PASSWORD`          | PostgreSQL password                           | `postgres`      |
+| `DB_PORT`              | PostgreSQL port                                | `5432`          |
 
 ## Usage
 
@@ -539,10 +547,12 @@ npm run test:watch
 ### Test Coverage
 
 Current test coverage:
-- **87%+** overall code coverage
-- **32** test cases
+- High overall coverage (historically >85%)
+- Dozens of test cases across units and integrations
 - Unit tests for services and utilities
 - Integration tests for API endpoints
+
+Note: For up-to-date numbers, run `npm test` and check the summary.
 
 ## Deployment
 
@@ -658,7 +668,7 @@ To-Be-Read-Exchange-Hub/
 ├── src/
 │   ├── server.js              # Application entry point
 │   ├── config/
-│   │   ├── db.js              # Database configuration
+│   │   ├── database.js        # Database configuration
 │   │   └── schema.sql         # Database schema
 │   ├── controllers/
 │   │   ├── bookController.js  # Book management logic
@@ -666,9 +676,13 @@ To-Be-Read-Exchange-Hub/
 │   ├── routes/
 │   │   ├── books.js           # Book API routes
 │   │   └── sync.js            # Sync API routes
-│   └── services/
-│       ├── enrichment.js      # Data enrichment service
-│       └── inventory.js       # Inventory logic service
+│   ├── services/
+│   │   ├── enrichment.js      # Data enrichment service
+│   │   └── inventory.js       # Inventory logic service
+│   ├── middleware/
+│   │   └── validation.js      # Request validation
+│   └── utils/
+│       └── logger.js          # Application logger
 ├── public/                    # Frontend static files
 ├── tests/                     # Test files
 ├── .env.example               # Environment variables template
