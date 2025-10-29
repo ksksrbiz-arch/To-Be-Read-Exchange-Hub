@@ -7,6 +7,7 @@ const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
 
 const bookRoutes = require('./routes/books');
+const bulkRoutes = require('./routes/bulk');
 const syncRoutes = require('./routes/sync');
 const healthDbRoute = require('./routes/healthDb');
 const swaggerSpec = require('./config/swagger');
@@ -61,6 +62,7 @@ app.use(express.static(path.join(__dirname, '../public'), {
 }));
 
 // API Routes with rate limiting
+app.use('/api/books/bulk', apiLimiter, bulkRoutes);
 app.use('/api/books', apiLimiter, bookRoutes);
 app.use('/api/sync', syncLimiter, syncRoutes);
 app.use('/api/health/db', healthDbRoute);
