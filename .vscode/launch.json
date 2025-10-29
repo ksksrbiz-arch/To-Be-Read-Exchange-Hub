@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Server (Local)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/server.js",
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["--inspect=9229"],
+      "env": {
+        "NODE_ENV": "development",
+        "LOG_LEVEL": "debug"
+      },
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Attach to Docker App",
+      "type": "node",
+      "request": "attach",
+      "address": "localhost",
+      "port": 9229,
+      "restart": true,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/app",
+      "skipFiles": ["<node_internals>/**"],
+      "timeout": 20000
+    },
+    {
+      "name": "Jest Tests (Debug)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+      "cwd": "${workspaceFolder}",
+      "args": ["--runInBand"],
+      "runtimeArgs": ["--inspect-brk=9230"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "test",
+        "LOG_LEVEL": "error"
+      }
+    }
+  ]
+}
