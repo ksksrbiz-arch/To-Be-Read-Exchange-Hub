@@ -16,10 +16,37 @@
         <div class="actions">
             <button id="addBookBtn" class="btn btn-primary">+ Add Book</button>
             <button id="syncPingoBtn" class="btn btn-secondary">🔄 Sync Pingo Inventory</button>
+            <button id="exportBtn" class="btn btn-info">📥 Export Data</button>
+        </div>
+
+        <div class="search-filter-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Search by title, author, or ISBN...">
+            </div>
+            <div class="filter-sort-controls">
+                <select id="shelfFilter">
+                    <option value="">All Shelves</option>
+                </select>
+                <select id="sortBy">
+                    <option value="title-asc">Title (A-Z)</option>
+                    <option value="title-desc">Title (Z-A)</option>
+                    <option value="author-asc">Author (A-Z)</option>
+                    <option value="author-desc">Author (Z-A)</option>
+                    <option value="location-asc">Location (A-Z)</option>
+                    <option value="location-desc">Location (Z-A)</option>
+                    <option value="quantity-asc">Quantity (Low-High)</option>
+                    <option value="quantity-desc">Quantity (High-Low)</option>
+                    <option value="date-newest">Newest First</option>
+                    <option value="date-oldest">Oldest First</option>
+                </select>
+            </div>
         </div>
 
         <div class="books-container">
-            <h2>Book Inventory</h2>
+            <div class="inventory-header">
+                <h2>Book Inventory</h2>
+                <span id="bookCount" class="book-count">0 books</span>
+            </div>
             <div id="booksGrid" class="books-grid"></div>
         </div>
     </div>
@@ -82,6 +109,60 @@
                     <button type="button" class="btn btn-cancel" id="cancelSync">Cancel</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Edit Book Modal -->
+    <div id="editBookModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Book</h2>
+            <form id="editBookForm">
+                <input type="hidden" id="editBookId" name="id">
+                
+                <div class="form-group">
+                    <label for="editIsbn">ISBN:</label>
+                    <input type="text" id="editIsbn" name="isbn" placeholder="Enter ISBN">
+                </div>
+
+                <div class="form-group">
+                    <label for="editTitle">Title: *</label>
+                    <input type="text" id="editTitle" name="title" required placeholder="Enter book title">
+                </div>
+
+                <div class="form-group">
+                    <label for="editAuthor">Author:</label>
+                    <input type="text" id="editAuthor" name="author" placeholder="Enter author name">
+                </div>
+
+                <div class="form-group">
+                    <label for="editPublisher">Publisher:</label>
+                    <input type="text" id="editPublisher" name="publisher" placeholder="Enter publisher">
+                </div>
+
+                <div class="form-group">
+                    <label for="editQuantity">Quantity:</label>
+                    <input type="number" id="editQuantity" name="quantity" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="editShelfLocation">Shelf/Section:</label>
+                    <input type="text" id="editShelfLocation" name="shelf_location" placeholder="e.g., A-12">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Book</button>
+                    <button type="button" class="btn btn-cancel" id="cancelEditBook">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Book Details Modal -->
+    <div id="bookDetailsModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close">&times;</span>
+            <div id="bookDetailsContent"></div>
         </div>
     </div>
 
