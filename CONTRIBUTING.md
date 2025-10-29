@@ -1,10 +1,12 @@
 # Contributing Guide
 
-Thank you for considering contributing to To-Be-Read Exchange Hub! This guide outlines the workflow, standards, and tooling to help you make effective contributions.
+Thank you for considering contributing to To-Be-Read Exchange Hub! This guide outlines the workflow,
+standards, and tooling to help you make effective contributions.
 
 ## 📜 Code of Conduct
 
-Please be respectful and foster an inclusive environment. Harassment or discrimination of any kind is not tolerated.
+Please be respectful and foster an inclusive environment. Harassment or discrimination of any kind
+is not tolerated.
 
 ## 🛠 Development Workflow
 
@@ -42,18 +44,21 @@ Please be respectful and foster an inclusive environment. Harassment or discrimi
 
 ## 🧪 Testing Standards
 
-We maintain high test coverage thresholds (Statements ≥80%, Branches ≥70%, Functions ≥90%, Lines ≥80%). New features should include:
+We maintain high test coverage thresholds (Statements ≥80%, Branches ≥70%, Functions ≥90%, Lines
+≥80%). New features should include:
 
 - Unit tests for pure logic (services, utils)
 - Integration tests for routes/controllers
 - Negative/edge case tests (validation failures, partial successes)
 
 Run full test suite:
+
 ```bash
 npm test
 ```
 
 Watch mode for rapid iteration:
+
 ```bash
 npm run test:watch
 ```
@@ -67,11 +72,13 @@ Debug configurations are provided in `.vscode/launch.json`:
 - `Jest Tests (Debug)`: Step through tests using `--inspect-brk`
 
 Start debug server quickly:
+
 ```bash
 npm run debug
 ```
 
 Set breakpoints in:
+
 - `src/controllers/bulkController.js` (bulk import/update)
 - `src/services/enrichment.js` (API merge logic)
 - `src/services/inventory.js` (location determination)
@@ -79,6 +86,7 @@ Set breakpoints in:
 ## 📦 Tasks Automation
 
 Common tasks are available via VS Code (Command Palette → Run Task):
+
 - `lint`: ESLint static analysis
 - `test`: Run full test suite
 - `test:watch`: Watch mode
@@ -87,6 +95,7 @@ Common tasks are available via VS Code (Command Palette → Run Task):
 ## 🧹 Code Style & Linting
 
 Enforced via ESLint and Prettier.
+
 - Run lint: `npm run lint`
 - Format code: `npm run format`
 - Check formatting: `npm run format:check`
@@ -96,11 +105,13 @@ No lint warnings are allowed (CI will fail). Fix issues before pushing.
 ## 🗃 Database & Environment
 
 Initialize DB:
+
 ```bash
 npm run db:init
 ```
 
 Copy and edit environment variables:
+
 ```bash
 cp .env.example .env
 ```
@@ -115,6 +126,7 @@ cp .env.example .env
 ## 🧾 Commit Message Conventions
 
 Follow Conventional Commits:
+
 - `feat(scope): summary` — New feature
 - `fix(scope): summary` — Bug fix
 - `docs(scope): summary` — Documentation changes
@@ -123,6 +135,7 @@ Follow Conventional Commits:
 - `chore(scope): summary` — Maintenance tasks
 
 Example:
+
 ```bash
 git commit -m "fix(inventory): correct section allocation when shelf full"
 ```
@@ -130,6 +143,7 @@ git commit -m "fix(inventory): correct section allocation when shelf full"
 ## ✅ Pull Request Checklist
 
 Before marking ready for review:
+
 - [ ] Branch up to date with `main`
 - [ ] Added/updated tests passing locally
 - [ ] No lint errors & formatting applied
@@ -139,6 +153,7 @@ Before marking ready for review:
 ## 🤖 Continuous Integration (CI)
 
 A GitHub Actions workflow runs on pushes and PRs:
+
 - Installs dependencies (`npm ci`)
 - Runs linting
 - Executes tests with coverage
@@ -150,6 +165,7 @@ You can view runs under the Actions tab.
 ## 📄 Documentation Updates
 
 If you add or modify endpoints:
+
 - Update Swagger annotations in route files
 - Re-run server and verify `/api-docs`
 - Reflect changes in README under relevant API sections
@@ -157,6 +173,7 @@ If you add or modify endpoints:
 ## 🐘 Large Changes Strategy
 
 For broad modifications (e.g., schema changes, architectural refactors):
+
 1. Open an issue describing rationale, impact, migration steps
 2. Propose phased approach (migration scripts, backward compatibility)
 3. Seek feedback before implementation
@@ -164,6 +181,7 @@ For broad modifications (e.g., schema changes, architectural refactors):
 ## 💬 Getting Help
 
 Open an issue with:
+
 - Clear title
 - Steps to reproduce (if bug)
 - Expected vs actual behavior
@@ -172,4 +190,5 @@ Open an issue with:
 
 ## 🙏 Thanks
 
-Your contributions help build a robust platform for book exchange communities. Thank you for improving To-Be-Read Exchange Hub!
+Your contributions help build a robust platform for book exchange communities. Thank you for
+improving To-Be-Read Exchange Hub!

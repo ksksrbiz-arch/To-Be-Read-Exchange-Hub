@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { bulkImportBooks, bulkUpdateBooks, bulkDeleteBooks } = require('../controllers/bulkController');
+const {
+  bulkImportBooks,
+  bulkUpdateBooks,
+  bulkDeleteBooks,
+} = require('../controllers/bulkController');
 
 // Configure multer for CSV uploads (in-memory)
 const upload = multer({

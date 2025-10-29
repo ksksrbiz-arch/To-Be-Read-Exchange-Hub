@@ -14,7 +14,8 @@ describe('Bulk Operations API', () => {
   describe('POST /api/books/bulk - JSON Import', () => {
     test('should import multiple books successfully', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({ rows: [{ id: 1, isbn: '123', title: 'Book 1' }] }) // INSERT 1
           .mockResolvedValueOnce({ rows: [{ id: 2, isbn: '456', title: 'Book 2' }] }) // INSERT 2
@@ -44,7 +45,8 @@ describe('Bulk Operations API', () => {
 
     test('should handle partial failures (207)', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({ rows: [{ id: 1 }] }) // INSERT success
           .mockRejectedValueOnce(new Error('DB Error')) // INSERT fail
@@ -73,10 +75,7 @@ describe('Bulk Operations API', () => {
     });
 
     test('should reject empty book array', async () => {
-      const res = await request(app)
-        .post('/api/books/bulk')
-        .send({ books: [] })
-        .expect(400);
+      const res = await request(app).post('/api/books/bulk').send({ books: [] }).expect(400);
 
       expect(res.body.error).toBe('No books to import');
     });
@@ -84,17 +83,15 @@ describe('Bulk Operations API', () => {
     test('should reject batch >1000 books', async () => {
       const books = Array(1001).fill({ isbn: '123', quantity: 1 });
 
-      const res = await request(app)
-        .post('/api/books/bulk')
-        .send({ books })
-        .expect(400);
+      const res = await request(app).post('/api/books/bulk').send({ books }).expect(400);
 
       expect(res.body.error).toBe('Batch size too large');
     });
 
     test('should validate required fields', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({}), // COMMIT
         release: jest.fn(),
@@ -115,7 +112,8 @@ describe('Bulk Operations API', () => {
 
     test('should validate quantity', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({}), // COMMIT
         release: jest.fn(),
@@ -136,7 +134,8 @@ describe('Bulk Operations API', () => {
 
     test('should rollback on critical failure', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockRejectedValueOnce(new Error('Critical DB Error')), // First INSERT fails critically
         release: jest.fn(),
@@ -159,7 +158,8 @@ describe('Bulk Operations API', () => {
   describe('POST /api/books/bulk - CSV Upload', () => {
     test('should parse and import CSV file', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({ rows: [{ id: 1 }] }) // INSERT
           .mockResolvedValueOnce({}), // COMMIT
@@ -192,7 +192,8 @@ describe('Bulk Operations API', () => {
   describe('PUT /api/books/bulk - Bulk Update', () => {
     test('should update multiple books', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 1 }] }) // UPDATE 1
           .mockResolvedValueOnce({ rowCount: 1, rows: [{ id: 2 }] }) // UPDATE 2
@@ -219,7 +220,8 @@ describe('Bulk Operations API', () => {
 
     test('should handle not found books', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({ rowCount: 0 }) // UPDATE not found
           .mockResolvedValueOnce({}), // COMMIT
@@ -240,10 +242,7 @@ describe('Bulk Operations API', () => {
     });
 
     test('should reject invalid updates', async () => {
-      const res = await request(app)
-        .put('/api/books/bulk')
-        .send({ updates: [] })
-        .expect(400);
+      const res = await request(app).put('/api/books/bulk').send({ updates: [] }).expect(400);
 
       expect(res.body.error).toBe('Invalid input');
     });
@@ -251,17 +250,15 @@ describe('Bulk Operations API', () => {
     test('should reject batch >500 updates', async () => {
       const updates = Array(501).fill({ id: 1, fields: { quantity: 1 } });
 
-      const res = await request(app)
-        .put('/api/books/bulk')
-        .send({ updates })
-        .expect(400);
+      const res = await request(app).put('/api/books/bulk').send({ updates }).expect(400);
 
       expect(res.body.error).toBe('Batch size too large');
     });
 
     test('should filter invalid fields', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({}), // COMMIT
         release: jest.fn(),
@@ -284,7 +281,8 @@ describe('Bulk Operations API', () => {
   describe('DELETE /api/books/bulk - Bulk Delete', () => {
     test('should delete multiple books', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({ rowCount: 3, rows: [{ id: 1 }, { id: 2 }, { id: 3 }] }) // DELETE
           .mockResolvedValueOnce({}), // COMMIT
@@ -305,7 +303,8 @@ describe('Bulk Operations API', () => {
 
     test('should report not found IDs', async () => {
       const mockClient = {
-        query: jest.fn()
+        query: jest
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({ rowCount: 2, rows: [{ id: 1 }, { id: 2 }] }) // Only 2 deleted
           .mockResolvedValueOnce({}), // COMMIT
@@ -324,10 +323,7 @@ describe('Bulk Operations API', () => {
     });
 
     test('should reject empty ID array', async () => {
-      const res = await request(app)
-        .delete('/api/books/bulk')
-        .send({ ids: [] })
-        .expect(400);
+      const res = await request(app).delete('/api/books/bulk').send({ ids: [] }).expect(400);
 
       expect(res.body.error).toBe('Invalid input');
     });
@@ -335,10 +331,7 @@ describe('Bulk Operations API', () => {
     test('should reject batch >500 deletions', async () => {
       const ids = Array(501).fill(1);
 
-      const res = await request(app)
-        .delete('/api/books/bulk')
-        .send({ ids })
-        .expect(400);
+      const res = await request(app).delete('/api/books/bulk').send({ ids }).expect(400);
 
       expect(res.body.error).toBe('Batch size too large');
     });

@@ -89,7 +89,10 @@ async function bulkImportBooks(req, res) {
         // Determine storage location
         const author = book.author || enrichedData.author || 'Unknown';
         const location = book.shelf_location
-          ? { shelf: book.shelf_location.split('-')[0], section: book.shelf_location.split('-')[1] || '1' }
+          ? {
+              shelf: book.shelf_location.split('-')[0],
+              section: book.shelf_location.split('-')[1] || '1',
+            }
           : await determineStorageLocation(author);
 
         // Insert book
@@ -189,7 +192,16 @@ async function bulkUpdateBooks(req, res) {
           throw new Error('Each update must have id and fields');
         }
 
-        const allowedFields = ['title', 'author', 'publisher', 'description', 'shelf_location', 'section', 'quantity', 'available_quantity'];
+        const allowedFields = [
+          'title',
+          'author',
+          'publisher',
+          'description',
+          'shelf_location',
+          'section',
+          'quantity',
+          'available_quantity',
+        ];
         const fields = Object.keys(update.fields).filter((f) => allowedFields.includes(f));
 
         if (fields.length === 0) {

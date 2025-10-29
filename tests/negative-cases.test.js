@@ -20,11 +20,13 @@ describe('Operational negative cases', () => {
   test('DELETE /api/books/:id returns error on non-existent book', async () => {
     // Mock DB query for deletion path to simulate no rows affected
     pool.query = jest.fn().mockResolvedValue({ rowCount: 0 });
-    const res = await request(app).delete('/api/books/999999').expect(res => {
-      if (res.status === 200) {
-        throw new Error('Expected non-200 status for missing book deletion');
-      }
-    });
+    const res = await request(app)
+      .delete('/api/books/999999')
+      .expect((res) => {
+        if (res.status === 200) {
+          throw new Error('Expected non-200 status for missing book deletion');
+        }
+      });
     expect(res.body.error).toBeDefined();
   });
 
@@ -40,7 +42,9 @@ describe('Operational negative cases', () => {
       }
     }
     if (!saw429) {
-      console.warn('Rate limiter not triggered within attempts; consider lowering API_RATE_MAX for test environment.');
+      console.warn(
+        'Rate limiter not triggered within attempts; consider lowering API_RATE_MAX for test environment.'
+      );
     }
     expect([true, false]).toContain(saw429); // do not fail build if high limit
   }, 30000);

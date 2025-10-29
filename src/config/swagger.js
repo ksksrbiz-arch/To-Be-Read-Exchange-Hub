@@ -6,7 +6,8 @@ const options = {
     info: {
       title: 'To-Be-Read Exchange Hub API',
       version: '1.0.0',
-      description: 'API for managing a community book exchange inventory with automated enrichment and sync capabilities',
+      description:
+        'API for managing a community book exchange inventory with automated enrichment and sync capabilities',
       contact: {
         name: 'API Support',
       },
