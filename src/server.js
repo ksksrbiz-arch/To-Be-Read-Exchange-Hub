@@ -38,8 +38,11 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '../public')));
+// Serve static files with cache control
+app.use(express.static(path.join(__dirname, '../public'), {
+  maxAge: 0, // Disable caching in development
+  etag: false
+}));
 
 // API Routes with rate limiting
 app.use('/api/books', apiLimiter, bookRoutes);
@@ -47,6 +50,9 @@ app.use('/api/sync', syncLimiter, syncRoutes);
 
 // Root route
 app.get('/', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
