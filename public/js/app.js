@@ -90,9 +90,11 @@ function showEditBookModal(book) {
   document.getElementById('editAuthor').value = book.author || '';
   document.getElementById('editPublisher').value = book.publisher || '';
   document.getElementById('editQuantity').value = book.quantity || 0;
-  document.getElementById('editShelfLocation').value = 
-    (book.shelf_location && book.section) ? `${book.shelf_location}-${book.section}` : (book.shelf_location || '');
-  
+  document.getElementById('editShelfLocation').value =
+    book.shelf_location && book.section
+      ? `${book.shelf_location}-${book.section}`
+      : book.shelf_location || '';
+
   document.getElementById('editBookModal').style.display = 'block';
 }
 
@@ -118,19 +120,23 @@ function showBookDetailsModal(book) {
           ${book.updated_at !== book.created_at ? `<p><strong>Updated:</strong> ${new Date(book.updated_at).toLocaleDateString()}</p>` : ''}
         </div>
       </div>
-      ${book.description ? `
+      ${
+        book.description
+          ? `
         <div class="book-description">
           <h3>Description</h3>
           <p>${escapeHtml(book.description)}</p>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
       <div class="book-details-actions">
         <button onclick="showEditBookModal(${JSON.stringify(book).replace(/"/g, '&quot;')})" class="btn btn-primary">Edit Book</button>
         <button onclick="deleteBook(${book.id})" class="btn btn-danger">Delete Book</button>
       </div>
     </div>
   `;
-  
+
   document.getElementById('bookDetailsContent').innerHTML = content;
   document.getElementById('bookDetailsModal').style.display = 'block';
 }
@@ -222,7 +228,7 @@ async function handleEditBook(e) {
 
   const formData = new FormData(e.target);
   const bookId = formData.get('id');
-  
+
   const updateData = {
     isbn: formData.get('isbn') || null,
     title: formData.get('title'),
@@ -290,39 +296,40 @@ async function deleteBook(bookId) {
 // Handle search
 function handleSearch() {
   const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-  
-  filteredBooks = allBooks.filter(book => {
+
+  filteredBooks = allBooks.filter((book) => {
     return (
       (book.title && book.title.toLowerCase().includes(searchTerm)) ||
       (book.author && book.author.toLowerCase().includes(searchTerm)) ||
       (book.isbn && book.isbn.toLowerCase().includes(searchTerm))
     );
   });
-  
+
   applyFiltersAndSort();
 }
 
 // Handle shelf filter
 function handleFilter() {
   const shelf = document.getElementById('shelfFilter').value;
-  
+
   if (shelf === '') {
     handleSearch(); // Reapply search
   } else {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    
-    filteredBooks = allBooks.filter(book => {
-      const matchesSearch = !searchTerm || 
+
+    filteredBooks = allBooks.filter((book) => {
+      const matchesSearch =
+        !searchTerm ||
         (book.title && book.title.toLowerCase().includes(searchTerm)) ||
         (book.author && book.author.toLowerCase().includes(searchTerm)) ||
         (book.isbn && book.isbn.toLowerCase().includes(searchTerm));
-      
+
       const matchesShelf = book.shelf_location === shelf;
-      
+
       return matchesSearch && matchesShelf;
     });
   }
-  
+
   applyFiltersAndSort();
 }
 
@@ -335,9 +342,9 @@ function handleSort() {
 function applyFiltersAndSort() {
   const sortBy = document.getElementById('sortBy').value;
   let booksToDisplay = [...filteredBooks];
-  
+
   // Sort books
-  switch(sortBy) {
+  switch (sortBy) {
     case 'title-asc':
       booksToDisplay.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
       break;
@@ -377,18 +384,18 @@ function applyFiltersAndSort() {
       booksToDisplay.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       break;
   }
-  
+
   displayBooks(booksToDisplay);
 }
 
 // Export data
 function exportData() {
   const format = prompt('Export format (enter "csv" or "json"):', 'csv');
-  
+
   if (!format || (format !== 'csv' && format !== 'json')) {
     return;
   }
-  
+
   if (format === 'json') {
     exportJSON();
   } else {
@@ -411,8 +418,20 @@ function exportJSON() {
 
 // Export as CSV
 function exportCSV() {
-  const headers = ['ID', 'ISBN', 'Title', 'Author', 'Publisher', 'Shelf', 'Section', 'Quantity', 'Available', 'Created', 'Updated'];
-  const rows = allBooks.map(book => [
+  const headers = [
+    'ID',
+    'ISBN',
+    'Title',
+    'Author',
+    'Publisher',
+    'Shelf',
+    'Section',
+    'Quantity',
+    'Available',
+    'Created',
+    'Updated',
+  ];
+  const rows = allBooks.map((book) => [
     book.id,
     book.isbn || '',
     book.title || '',
@@ -423,14 +442,14 @@ function exportCSV() {
     book.quantity || 0,
     book.available_quantity || 0,
     book.created_at || '',
-    book.updated_at || ''
+    book.updated_at || '',
   ]);
-  
+
   const csvContent = [
     headers.join(','),
-    ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
   ].join('\n');
-  
+
   const dataBlob = new Blob([csvContent], { type: 'text/csv' });
   const url = URL.createObjectURL(dataBlob);
   const link = document.createElement('a');
@@ -450,15 +469,15 @@ async function loadBooks() {
     if (response.ok && result.books) {
       allBooks = result.books;
       filteredBooks = [...allBooks];
-      
+
       // Update shelf filter options
       updateShelfFilter();
-      
+
       // Apply current sorting
       applyFiltersAndSort();
-      
+
       // Update book count
-      document.getElementById('bookCount').textContent = 
+      document.getElementById('bookCount').textContent =
         `${allBooks.length} book${allBooks.length !== 1 ? 's' : ''}`;
     } else {
       showNotification('Failed to load books', 'error');
@@ -471,13 +490,14 @@ async function loadBooks() {
 
 // Update shelf filter dropdown
 function updateShelfFilter() {
-  const shelves = [...new Set(allBooks.map(b => b.shelf_location).filter(Boolean))].sort();
+  const shelves = [...new Set(allBooks.map((b) => b.shelf_location).filter(Boolean))].sort();
   const shelfFilter = document.getElementById('shelfFilter');
   const currentValue = shelfFilter.value;
-  
-  shelfFilter.innerHTML = '<option value="">All Shelves</option>' +
-    shelves.map(shelf => `<option value="${shelf}">Shelf ${shelf}</option>`).join('');
-  
+
+  shelfFilter.innerHTML =
+    '<option value="">All Shelves</option>' +
+    shelves.map((shelf) => `<option value="${shelf}">Shelf ${shelf}</option>`).join('');
+
   if (currentValue && shelves.includes(currentValue)) {
     shelfFilter.value = currentValue;
   }
