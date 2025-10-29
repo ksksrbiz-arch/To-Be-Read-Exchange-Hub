@@ -498,7 +498,7 @@ The system uses an intelligent algorithm to organize books automatically:
 
 When you provide an ISBN, the system automatically fetches additional book information:
 
-### How It Works
+### Enrichment Process
 
 1. **Query External APIs**
    - Open Library API (primary source)
@@ -585,7 +585,7 @@ Note: For up-to-date numbers, run `npm test` and check the summary.
 The application includes automated deployment workflows via GitHub Actions. Follow these steps to
 set up and trigger deployments.
 
-### Prerequisites
+### Deployment Prerequisites
 
 Before deploying, you need to configure the `DEPLOY_TOKEN` secret in your GitHub repository:
 
@@ -605,6 +605,7 @@ Before deploying, you need to configure the `DEPLOY_TOKEN` secret in your GitHub
 1. Get your Vercel token from [vercel.com/account/tokens](https://vercel.com/account/tokens)
 2. Add it as `DEPLOY_TOKEN` in GitHub Secrets
 3. Uncomment the Vercel deployment command in `.github/workflows/deploy.yml`:
+
    ```yaml
    vercel --prod --token=$DEPLOY_TOKEN
    ```
@@ -615,6 +616,7 @@ Before deploying, you need to configure the `DEPLOY_TOKEN` secret in your GitHub
    [Netlify account settings](https://app.netlify.com/user/applications)
 2. Add it as `DEPLOY_TOKEN` in GitHub Secrets
 3. Uncomment the Netlify deployment command in `.github/workflows/deploy.yml`:
+
    ```yaml
    netlify deploy --prod --auth=$DEPLOY_TOKEN
    ```
@@ -625,6 +627,7 @@ Before deploying, you need to configure the `DEPLOY_TOKEN` secret in your GitHub
 2. Format them as `AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY`
 3. Add the formatted string as `DEPLOY_TOKEN` in GitHub Secrets
 4. Uncomment and configure the AWS deployment command in `.github/workflows/deploy.yml`:
+
    ```yaml
    aws s3 sync dist/ s3://your-bucket --region us-east-1
    ```
@@ -693,7 +696,7 @@ This starts the server with the development environment settings.
 
 ### Project Structure
 
-```
+```plaintext
 To-Be-Read-Exchange-Hub/
 ├── src/
 │   ├── server.js              # Application entry point
@@ -775,6 +778,7 @@ Tracks all sync operations for audit purposes.
 
 2. Verify database credentials in `.env` file
 3. Check if the database exists:
+
    ```bash
    psql -l | grep books_exchange
    ```
@@ -786,10 +790,13 @@ Tracks all sync operations for audit purposes.
 **Solution:**
 
 1. Find the process using port 3000:
+
    ```bash
    lsof -i :3000
    ```
+
 2. Kill the process or change the port in `.env`:
+
    ```env
    PORT=3001
    ```
@@ -821,14 +828,19 @@ psql books_exchange < src/config/schema.sql
 **Solution:**
 
 1. Clear npm cache:
+
    ```bash
    npm cache clean --force
    ```
+
 2. Delete `node_modules` and `package-lock.json`:
+
    ```bash
    rm -rf node_modules package-lock.json
    ```
+
 3. Reinstall:
+
    ```bash
    npm install
    ```
@@ -852,4 +864,4 @@ This project is licensed under the ISC License - see the LICENSE file for detail
 
 ---
 
-**Made with ❤️ for book lovers and exchange communities**
+Made with ❤️ for book lovers and exchange communities
