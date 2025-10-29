@@ -11,7 +11,10 @@
     "build": "node scripts/build.js",
     "lint": "eslint src/ --ext .js --max-warnings=0",
     "format": "prettier --write \"**/*.{js,json,md,yml,yaml}\"",
-    "format:check": "prettier --check \"**/*.{js,json,md,yml,yaml}\""
+    "format:check": "prettier --check \"**/*.{js,json,md,yml,yaml}\"",
+    "setup": "bash scripts/setup.sh",
+    "db:init": "bash scripts/init-db.sh",
+    "verify": "npm run lint && npm run format:check && npm test"
   },
   "keywords": [],
   "author": "",

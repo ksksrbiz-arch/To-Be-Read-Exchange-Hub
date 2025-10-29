@@ -35,10 +35,31 @@ storage allocation.
 
 ## Quick Start
 
-Get started in 5 minutes:
+Get started in 5 minutes with automated setup:
 
 ```bash
 # 1. Clone and navigate to the repository
+git clone https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub.git
+cd To-Be-Read-Exchange-Hub
+
+# 2. Run the automated setup script (recommended)
+npm run setup
+
+# 3. Edit .env with your database password
+nano .env
+
+# 4. Start the application
+npm start
+```
+
+Visit `http://localhost:3000` to access the application.
+
+**Manual Setup (Alternative):**
+
+If you prefer manual setup or the automated script doesn't work on your system:
+
+```bash
+# 1. Clone repository (same as above)
 git clone https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub.git
 cd To-Be-Read-Exchange-Hub
 
@@ -46,11 +67,7 @@ cd To-Be-Read-Exchange-Hub
 npm install
 
 # 3. Set up database
-createdb books_exchange
-psql books_exchange < src/config/schema.sql
-
-# Or run the helper script (Linux/macOS):
-bash scripts/init-db.sh
+npm run db:init
 
 # 4. Configure environment
 cp .env.example .env
@@ -59,8 +76,6 @@ cp .env.example .env
 # 5. Start the application
 npm start
 ```
-
-Visit `http://localhost:3000` to access the application.
 
 ## Prerequisites
 
@@ -72,7 +87,40 @@ Before you begin, ensure you have the following installed:
 
 ## Installation
 
-Follow these detailed steps to set up the application:
+You can set up the application using either the **automated setup script** (recommended) or follow
+the **manual steps** below.
+
+### Option A: Automated Setup (Recommended)
+
+The automated setup script will check prerequisites, install dependencies, configure environment,
+and set up the database:
+
+```bash
+# Clone the repository
+git clone https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub.git
+cd To-Be-Read-Exchange-Hub
+
+# Run automated setup
+npm run setup
+
+# Edit .env with your database password
+nano .env
+
+# Start the server
+npm start
+```
+
+The setup script will:
+
+- ✅ Verify Node.js and PostgreSQL are installed
+- ✅ Install all npm dependencies
+- ✅ Create .env file from template
+- ✅ Set up and initialize the database
+- ✅ Run tests to verify installation
+
+### Option B: Manual Installation
+
+Follow these detailed steps to set up the application manually:
 
 ### 1. Clone the Repository
 
@@ -173,23 +221,24 @@ npm run dev
 **Additional Commands:**
 
 ```bash
-# Run tests
-npm test
+# Setup & Database
+npm run setup                # Run complete automated setup (first-time setup)
+npm run db:init              # Initialize database only
 
-# Run tests in watch mode (during development)
-npm run test:watch
+# Development
+npm run dev                  # Start with auto-reload (development mode)
+npm test                     # Run all tests with coverage
+npm run test:watch           # Run tests in watch mode
 
-# Check code formatting
-npm run format:check
+# Code Quality
+npm run lint                 # Check for code errors
+npm run format               # Auto-format all code
+npm run format:check         # Check if code is formatted
+npm run verify               # Run lint + format check + tests (pre-commit)
 
-# Auto-format code
-npm run format
-
-# Lint code for errors
-npm run lint
-
-# Build production artifacts
-npm run build
+# Production
+npm run build                # Build production artifacts
+npm start                    # Start production server
 ```
 
 **Verify Installation:**
@@ -749,12 +798,51 @@ Run the application in development mode:
 npm run dev
 ```
 
-This starts the server with the development environment settings.
+This starts the server with the development environment settings and auto-reloads on file changes.
+
+### Available npm Scripts
+
+Complete reference of all available commands:
+
+| Command                | Description                                             |
+| ---------------------- | ------------------------------------------------------- |
+| `npm run setup`        | 🚀 Complete automated setup (first-time installation)   |
+| `npm run db:init`      | 🗄️ Initialize/reset database                            |
+| `npm start`            | ▶️ Start production server                              |
+| `npm run dev`          | 🔧 Start development server with auto-reload            |
+| `npm test`             | 🧪 Run all tests with coverage report                   |
+| `npm run test:watch`   | 👀 Run tests in watch mode (auto-rerun on changes)      |
+| `npm run lint`         | 🔍 Check code for errors and style issues               |
+| `npm run format`       | ✨ Auto-format all code files                           |
+| `npm run format:check` | 📋 Check if code is properly formatted                  |
+| `npm run verify`       | ✅ Run lint + format check + tests (pre-commit quality) |
+| `npm run build`        | 📦 Build production-ready artifacts in dist/            |
+
+**Recommended Workflow:**
+
+```bash
+# First time setup
+npm run setup
+
+# Daily development
+npm run dev                 # Start dev server
+npm run test:watch          # Run tests in another terminal
+
+# Before committing
+npm run verify              # Ensure code quality
+
+# Production deployment
+npm run build               # Create production build
+```
 
 ### Project Structure
 
 ```plaintext
 To-Be-Read-Exchange-Hub/
+├── scripts/
+│   ├── setup.sh               # Automated setup script
+│   ├── init-db.sh             # Database initialization script
+│   └── build.js               # Production build script
 ├── src/
 │   ├── server.js              # Application entry point
 │   ├── config/
