@@ -19,7 +19,7 @@ describe('Books API', () => {
         author: 'J.K. Rowling',
         publisher: 'Bloomsbury',
         description: 'A wizard story',
-        cover_url: 'http://example.com/cover.jpg'
+        cover_url: 'http://example.com/cover.jpg',
       });
 
       pool.query = jest.fn().mockResolvedValue({
@@ -32,16 +32,16 @@ describe('Books API', () => {
             shelf_location: 'R',
             section: '1',
             quantity: 1,
-            available_quantity: 1
-          }
-        ]
+            available_quantity: 1,
+          },
+        ],
       });
 
       const response = await request(app)
         .post('/api/books')
         .send({
           isbn: '9780747532743',
-          quantity: 1
+          quantity: 1,
         })
         .expect(201);
 
@@ -57,7 +57,7 @@ describe('Books API', () => {
         author: 'Test Author',
         publisher: null,
         description: null,
-        cover_url: null
+        cover_url: null,
       });
 
       pool.query = jest.fn().mockResolvedValue({
@@ -67,9 +67,9 @@ describe('Books API', () => {
             isbn: '9780747532743',
             shelf_location: 'A',
             section: '12',
-            quantity: 1
-          }
-        ]
+            quantity: 1,
+          },
+        ],
       });
 
       const response = await request(app)
@@ -77,7 +77,7 @@ describe('Books API', () => {
         .send({
           isbn: '9780747532743',
           shelf_location: 'A-12',
-          quantity: 1
+          quantity: 1,
         })
         .expect(201);
 
@@ -90,7 +90,7 @@ describe('Books API', () => {
       const response = await request(app)
         .post('/api/books')
         .send({
-          author: 'Test Author'
+          author: 'Test Author',
         })
         .expect(400);
 
@@ -104,7 +104,7 @@ describe('Books API', () => {
         .post('/api/books')
         .send({
           isbn: '9780747532743',
-          quantity: 1
+          quantity: 1,
         })
         .expect(500);
 
@@ -120,20 +120,18 @@ describe('Books API', () => {
             id: 1,
             title: 'Book 1',
             author: 'Author 1',
-            quantity: 5
+            quantity: 5,
           },
           {
             id: 2,
             title: 'Book 2',
             author: 'Author 2',
-            quantity: 3
-          }
-        ]
+            quantity: 3,
+          },
+        ],
       });
 
-      const response = await request(app)
-        .get('/api/books')
-        .expect(200);
+      const response = await request(app).get('/api/books').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.books).toHaveLength(2);
@@ -147,14 +145,12 @@ describe('Books API', () => {
           {
             id: 1,
             title: 'Book 1',
-            author: 'Author 1'
-          }
-        ]
+            author: 'Author 1',
+          },
+        ],
       });
 
-      const response = await request(app)
-        .get('/api/books/1')
-        .expect(200);
+      const response = await request(app).get('/api/books/1').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.book.id).toBe(1);
@@ -162,12 +158,10 @@ describe('Books API', () => {
 
     test('should return 404 if book not found', async () => {
       pool.query = jest.fn().mockResolvedValue({
-        rows: []
+        rows: [],
       });
 
-      const response = await request(app)
-        .get('/api/books/999')
-        .expect(404);
+      const response = await request(app).get('/api/books/999').expect(404);
 
       expect(response.body.error).toBe('Book not found');
     });
@@ -180,16 +174,16 @@ describe('Books API', () => {
           {
             id: 1,
             title: 'Updated Title',
-            quantity: 10
-          }
-        ]
+            quantity: 10,
+          },
+        ],
       });
 
       const response = await request(app)
         .put('/api/books/1')
         .send({
           title: 'Updated Title',
-          quantity: 10
+          quantity: 10,
         })
         .expect(200);
 
@@ -201,7 +195,7 @@ describe('Books API', () => {
       const response = await request(app)
         .put('/api/books/1')
         .send({
-          invalid_field: 'value'
+          invalid_field: 'value',
         })
         .expect(400);
 
@@ -212,12 +206,10 @@ describe('Books API', () => {
   describe('DELETE /api/books/:id', () => {
     test('should delete a book', async () => {
       pool.query = jest.fn().mockResolvedValue({
-        rows: [{ id: 1 }]
+        rows: [{ id: 1 }],
       });
 
-      const response = await request(app)
-        .delete('/api/books/1')
-        .expect(200);
+      const response = await request(app).delete('/api/books/1').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe('Book deleted successfully');
@@ -225,12 +217,10 @@ describe('Books API', () => {
 
     test('should return 404 if book not found', async () => {
       pool.query = jest.fn().mockResolvedValue({
-        rows: []
+        rows: [],
       });
 
-      const response = await request(app)
-        .delete('/api/books/999')
-        .expect(404);
+      const response = await request(app).delete('/api/books/999').expect(404);
 
       expect(response.body.error).toBe('Book not found');
     });

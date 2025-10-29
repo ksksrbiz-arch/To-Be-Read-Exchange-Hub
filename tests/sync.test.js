@@ -12,7 +12,7 @@ describe('Sync API', () => {
   beforeEach(() => {
     mockClient = {
       query: jest.fn(),
-      release: jest.fn()
+      release: jest.fn(),
     };
     pool.connect = jest.fn().mockResolvedValue(mockClient);
     pool.query = jest.fn();
@@ -30,7 +30,7 @@ describe('Sync API', () => {
         author: 'J.K. Rowling',
         publisher: 'Bloomsbury',
         description: 'Test',
-        cover_url: 'http://test.com/cover.jpg'
+        cover_url: 'http://test.com/cover.jpg',
       });
 
       mockClient.query
@@ -47,9 +47,9 @@ describe('Sync API', () => {
               isbn: '9780747532743',
               title: 'Harry Potter',
               author: 'J.K. Rowling',
-              quantity: 5
-            }
-          ]
+              quantity: 5,
+            },
+          ],
         })
         .expect(200);
 
@@ -66,7 +66,7 @@ describe('Sync API', () => {
         author: 'Test Author',
         publisher: null,
         description: null,
-        cover_url: null
+        cover_url: null,
       });
 
       mockClient.query
@@ -83,8 +83,8 @@ describe('Sync API', () => {
           books: [
             { isbn: '1111111111111', title: 'Book 1', quantity: 1 },
             { isbn: '2222222222222', title: 'Book 2', quantity: 2 },
-            { isbn: '3333333333333', title: 'Book 3', quantity: 3 }
-          ]
+            { isbn: '3333333333333', title: 'Book 3', quantity: 3 },
+          ],
         })
         .expect(200);
 
@@ -109,8 +109,8 @@ describe('Sync API', () => {
         .send({
           books: [
             { isbn: '1111111111111', title: 'Book 1', quantity: 1 },
-            { isbn: '2222222222222', title: 'Book 2', quantity: 2 }
-          ]
+            { isbn: '2222222222222', title: 'Book 2', quantity: 2 },
+          ],
         })
         .expect(200);
 
@@ -121,10 +121,7 @@ describe('Sync API', () => {
     });
 
     test('should return 400 if books array is missing', async () => {
-      const response = await request(app)
-        .post('/api/sync/pingo')
-        .send({})
-        .expect(400);
+      const response = await request(app).post('/api/sync/pingo').send({}).expect(400);
 
       expect(response.body.error).toBe('Invalid request: books array is required');
     });
@@ -132,20 +129,17 @@ describe('Sync API', () => {
     test('should rollback on critical failure', async () => {
       enrichBookData.mockResolvedValue({
         title: 'Test Book',
-        author: 'Test Author'
+        author: 'Test Author',
       });
 
-      mockClient.query
-        .mockRejectedValueOnce(new Error('Critical DB Error')); // BEGIN fails
+      mockClient.query.mockRejectedValueOnce(new Error('Critical DB Error')); // BEGIN fails
 
       pool.query = jest.fn().mockResolvedValue({}); // For logging
 
       const response = await request(app)
         .post('/api/sync/pingo')
         .send({
-          books: [
-            { isbn: '1111111111111', title: 'Book 1', quantity: 1 }
-          ]
+          books: [{ isbn: '1111111111111', title: 'Book 1', quantity: 1 }],
         })
         .expect(500);
 
@@ -163,21 +157,19 @@ describe('Sync API', () => {
             sync_date: '2025-01-01T00:00:00Z',
             books_synced: 10,
             status: 'success',
-            error_message: null
+            error_message: null,
           },
           {
             id: 2,
             sync_date: '2025-01-02T00:00:00Z',
             books_synced: 5,
             status: 'partial',
-            error_message: 'Some errors'
-          }
-        ]
+            error_message: 'Some errors',
+          },
+        ],
       });
 
-      const response = await request(app)
-        .get('/api/sync/history')
-        .expect(200);
+      const response = await request(app).get('/api/sync/history').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.syncHistory).toHaveLength(2);

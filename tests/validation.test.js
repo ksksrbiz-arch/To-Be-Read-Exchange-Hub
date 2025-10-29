@@ -38,7 +38,18 @@ describe('Request validation', () => {
   });
 
   test('POST /api/books passes validation for valid payload', async () => {
-    pool.query = jest.fn().mockResolvedValue({ rows: [{ id: 1, isbn: '111', shelf_location: 'A', section: '1', quantity: 1, available_quantity: 1 }] });
+    pool.query = jest.fn().mockResolvedValue({
+      rows: [
+        {
+          id: 1,
+          isbn: '111',
+          shelf_location: 'A',
+          section: '1',
+          quantity: 1,
+          available_quantity: 1,
+        },
+      ],
+    });
 
     const res = await request(app)
       .post('/api/books')

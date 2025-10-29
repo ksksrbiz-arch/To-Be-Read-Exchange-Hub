@@ -5,7 +5,7 @@ const {
   getBooks,
   getBookById,
   updateBook,
-  deleteBook
+  deleteBook,
 } = require('../controllers/bookController');
 const { validateCreateBook, validateUpdateBook } = require('../middleware/validation');
 

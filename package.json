@@ -10,7 +10,8 @@
     "test:watch": "jest --watch",
     "build": "node -e \"console.log('build placeholder'); const fs = require('fs'); const path = require('path'); fs.mkdirSync('dist', { recursive: true }); fs.cpSync('src', 'dist/src', { recursive: true }); fs.copyFileSync('package.json', 'dist/package.json'); console.log('✓ Created dist/ directory with src/ and package.json');\"",
     "lint": "eslint src/ --ext .js --max-warnings=0",
-    "format:check": "node -e \"console.log('format check placeholder')\""
+    "format": "prettier --write \"**/*.{js,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md,yml,yaml}\""
   },
   "keywords": [],
   "author": "",
@@ -30,6 +31,7 @@
     "eslint": "^9.38.0",
     "jest": "^30.2.0",
     "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
     "supertest": "^7.1.4"
   }
 }

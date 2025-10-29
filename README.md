@@ -1,6 +1,7 @@
 # 📚 To-Be-Read Exchange Hub
 
-A smart inventory management system for book exchange with automated data enrichment and intelligent storage allocation.
+A smart inventory management system for book exchange with automated data enrichment and intelligent
+storage allocation.
 
 ## Table of Contents
 
@@ -23,8 +24,10 @@ A smart inventory management system for book exchange with automated data enrich
 
 ## Features
 
-- **Smart Inventory Logic**: Automatically determines optimal storage locations based on author names
-- **Data Enrichment**: Fetches book metadata (cover, description, publisher) from Open Library and Google Books APIs
+- **Smart Inventory Logic**: Automatically determines optimal storage locations based on author
+  names
+- **Data Enrichment**: Fetches book metadata (cover, description, publisher) from Open Library and
+  Google Books APIs
 - **Pingo Sync**: Import and sync inventory data from Pingo systems
 - **Manual Override**: Option to manually specify shelf/section locations
 - **RESTful API**: Comprehensive API for book management
@@ -145,20 +148,20 @@ npm run dev
 
 ### Environment Variables
 
-| Variable               | Description                                   | Default         |
-|------------------------|-----------------------------------------------|-----------------|
-| `PORT`                 | Application server port                       | `3000`          |
-| `NODE_ENV`             | Environment mode                              | `development`   |
-| `LOG_LEVEL`            | Logger level (`error`, `warn`, `info`, etc.)  | `info`          |
-| `API_RATE_WINDOW_MIN`  | API rate limit window (minutes)               | `15`            |
-| `API_RATE_MAX`         | Max API requests per IP per window            | `100`           |
-| `SYNC_RATE_WINDOW_MIN` | Sync rate limit window (minutes)              | `15`            |
-| `SYNC_RATE_MAX`        | Max sync requests per window                  | `10`            |
-| `DB_USER`              | PostgreSQL username                           | `postgres`      |
-| `DB_HOST`              | Database host address                         | `localhost`     |
-| `DB_NAME`              | Database name                                  | `books_exchange`|
-| `DB_PASSWORD`          | PostgreSQL password                           | `postgres`      |
-| `DB_PORT`              | PostgreSQL port                                | `5432`          |
+| Variable               | Description                                  | Default          |
+| ---------------------- | -------------------------------------------- | ---------------- |
+| `PORT`                 | Application server port                      | `3000`           |
+| `NODE_ENV`             | Environment mode                             | `development`    |
+| `LOG_LEVEL`            | Logger level (`error`, `warn`, `info`, etc.) | `info`           |
+| `API_RATE_WINDOW_MIN`  | API rate limit window (minutes)              | `15`             |
+| `API_RATE_MAX`         | Max API requests per IP per window           | `100`            |
+| `SYNC_RATE_WINDOW_MIN` | Sync rate limit window (minutes)             | `15`             |
+| `SYNC_RATE_MAX`        | Max sync requests per window                 | `10`             |
+| `DB_USER`              | PostgreSQL username                          | `postgres`       |
+| `DB_HOST`              | Database host address                        | `localhost`      |
+| `DB_NAME`              | Database name                                | `books_exchange` |
+| `DB_PASSWORD`          | PostgreSQL password                          | `postgres`       |
+| `DB_PORT`              | PostgreSQL port                              | `5432`           |
 
 ## Usage
 
@@ -174,7 +177,8 @@ npm run dev
 
 ### API Usage
 
-You can interact with the application programmatically using the REST API. See the [API Documentation](#api-documentation) section below for details.
+You can interact with the application programmatically using the REST API. See the
+[API Documentation](#api-documentation) section below for details.
 
 ## API Documentation
 
@@ -189,17 +193,19 @@ The application provides a comprehensive RESTful API for managing books and sync
 Creates a new book with smart inventory logic and automatic data enrichment.
 
 **Request Body:**
+
 ```json
 {
-  "isbn": "9780747532743",           // Required (if title not provided)
-  "title": "Harry Potter...",         // Required (if ISBN not provided)
-  "author": "J.K. Rowling",          // Optional (auto-filled from ISBN)
-  "quantity": 5,                      // Required
-  "shelf_location": "A-12"            // Optional (manual override)
+  "isbn": "9780747532743", // Required (if title not provided)
+  "title": "Harry Potter...", // Required (if ISBN not provided)
+  "author": "J.K. Rowling", // Optional (auto-filled from ISBN)
+  "quantity": 5, // Required
+  "shelf_location": "A-12" // Optional (manual override)
 }
 ```
 
 **Success Response (201):**
+
 ```json
 {
   "success": true,
@@ -220,6 +226,7 @@ Creates a new book with smart inventory logic and automatic data enrichment.
 ```
 
 **Example:**
+
 ```bash
 curl -X POST http://localhost:3000/api/books \
   -H "Content-Type: application/json" \
@@ -238,6 +245,7 @@ curl -X POST http://localhost:3000/api/books \
 Retrieves all books in the inventory.
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -245,7 +253,7 @@ Retrieves all books in the inventory.
     {
       "id": 1,
       "isbn": "9780747532743",
-      "title": "Harry Potter...",
+      "title": "Harry Potter..."
       // ... other book fields
     }
   ]
@@ -253,6 +261,7 @@ Retrieves all books in the inventory.
 ```
 
 **Example:**
+
 ```bash
 curl http://localhost:3000/api/books
 ```
@@ -266,20 +275,23 @@ curl http://localhost:3000/api/books
 Retrieves a single book by its ID.
 
 **Parameters:**
+
 - `id` - Book ID (integer)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
   "book": {
-    "id": 1,
+    "id": 1
     // ... book fields
   }
 }
 ```
 
 **Error Response (404):**
+
 ```json
 {
   "success": false,
@@ -296,19 +308,22 @@ Retrieves a single book by its ID.
 Updates an existing book's information.
 
 **Parameters:**
+
 - `id` - Book ID (integer)
 
 **Request Body:**
+
 ```json
 {
-  "title": "Updated Title",           // Optional
-  "author": "Updated Author",         // Optional
-  "quantity": 10,                     // Optional
-  "shelf_location": "B-5"             // Optional
+  "title": "Updated Title", // Optional
+  "author": "Updated Author", // Optional
+  "quantity": 10, // Optional
+  "shelf_location": "B-5" // Optional
 }
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -327,9 +342,11 @@ Updates an existing book's information.
 Removes a book from the inventory.
 
 **Parameters:**
+
 - `id` - Book ID (integer)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -348,6 +365,7 @@ Removes a book from the inventory.
 Imports and synchronizes inventory data from Pingo systems.
 
 **Request Body:**
+
 ```json
 {
   "books": [
@@ -368,6 +386,7 @@ Imports and synchronizes inventory data from Pingo systems.
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -378,6 +397,7 @@ Imports and synchronizes inventory data from Pingo systems.
 ```
 
 **Partial Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -393,6 +413,7 @@ Imports and synchronizes inventory data from Pingo systems.
 ```
 
 **Example:**
+
 ```bash
 curl -X POST http://localhost:3000/api/sync/pingo \
   -H "Content-Type: application/json" \
@@ -417,6 +438,7 @@ curl -X POST http://localhost:3000/api/sync/pingo \
 Retrieves the history of all sync operations.
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -433,6 +455,7 @@ Retrieves the history of all sync operations.
 ```
 
 **Example:**
+
 ```bash
 curl http://localhost:3000/api/sync/history
 ```
@@ -464,12 +487,12 @@ The system uses an intelligent algorithm to organize books automatically:
 
 ### Examples
 
-| Author        | Auto-Assigned Location |
-|---------------|------------------------|
-| Stephen King  | Shelf K, Section 1     |
-| J.K. Rowling  | Shelf R, Section 1     |
-| Harper Lee    | Shelf L, Section 1     |
-| Isaac Asimov  | Shelf A, Section 1     |
+| Author       | Auto-Assigned Location |
+| ------------ | ---------------------- |
+| Stephen King | Shelf K, Section 1     |
+| J.K. Rowling | Shelf R, Section 1     |
+| Harper Lee   | Shelf L, Section 1     |
+| Isaac Asimov | Shelf A, Section 1     |
 
 ## Data Enrichment
 
@@ -504,6 +527,7 @@ When you provide an ISBN, the system automatically fetches additional book infor
 ### Example
 
 Input:
+
 ```json
 {
   "isbn": "9780747532743",
@@ -512,6 +536,7 @@ Input:
 ```
 
 Output (enriched automatically):
+
 ```json
 {
   "isbn": "9780747532743",
@@ -547,6 +572,7 @@ npm run test:watch
 ### Test Coverage
 
 Current test coverage:
+
 - High overall coverage (historically >85%)
 - Dozens of test cases across units and integrations
 - Unit tests for services and utilities
@@ -556,7 +582,8 @@ Note: For up-to-date numbers, run `npm test` and check the summary.
 
 ## Deployment
 
-The application includes automated deployment workflows via GitHub Actions. Follow these steps to set up and trigger deployments.
+The application includes automated deployment workflows via GitHub Actions. Follow these steps to
+set up and trigger deployments.
 
 ### Prerequisites
 
@@ -584,7 +611,8 @@ Before deploying, you need to configure the `DEPLOY_TOKEN` secret in your GitHub
 
 #### Netlify Deployment
 
-1. Generate a Netlify personal access token from your [Netlify account settings](https://app.netlify.com/user/applications)
+1. Generate a Netlify personal access token from your
+   [Netlify account settings](https://app.netlify.com/user/applications)
 2. Add it as `DEPLOY_TOKEN` in GitHub Secrets
 3. Uncomment the Netlify deployment command in `.github/workflows/deploy.yml`:
    ```yaml
@@ -641,10 +669,12 @@ The deployment workflow automatically:
 ### Troubleshooting Deployment
 
 **Deployment fails with "DEPLOY_TOKEN not set":**
+
 - Ensure you've added the `DEPLOY_TOKEN` secret in GitHub repository settings
 - Verify the secret name is exactly `DEPLOY_TOKEN` (case-sensitive)
 
 **Deployment succeeds but application doesn't update:**
+
 - Check your platform-specific deployment command is uncommented
 - Verify the deployment target (bucket, site ID, etc.) is correct
 - Review deployment logs in the Actions tab
@@ -695,33 +725,33 @@ To-Be-Read-Exchange-Hub/
 
 Stores all book inventory information.
 
-| Column              | Type         | Description                           |
-|---------------------|-------------|---------------------------------------|
-| `id`                | SERIAL      | Primary key                          |
-| `isbn`              | VARCHAR(13) | Unique ISBN (13 digits)              |
-| `title`             | VARCHAR     | Book title                           |
-| `author`            | VARCHAR     | Author name                          |
-| `publisher`         | VARCHAR     | Publisher name                       |
-| `description`       | TEXT        | Book description/synopsis            |
-| `cover_url`         | VARCHAR     | Cover image URL                      |
-| `shelf_location`    | VARCHAR(10) | Shelf identifier (e.g., "A", "B")    |
-| `section`           | VARCHAR(10) | Section within shelf (e.g., "12")    |
-| `quantity`          | INTEGER     | Total quantity in inventory          |
-| `available_quantity`| INTEGER     | Available quantity for exchange      |
-| `created_at`        | TIMESTAMP   | Record creation timestamp            |
-| `updated_at`        | TIMESTAMP   | Last update timestamp                |
+| Column               | Type        | Description                       |
+| -------------------- | ----------- | --------------------------------- |
+| `id`                 | SERIAL      | Primary key                       |
+| `isbn`               | VARCHAR(13) | Unique ISBN (13 digits)           |
+| `title`              | VARCHAR     | Book title                        |
+| `author`             | VARCHAR     | Author name                       |
+| `publisher`          | VARCHAR     | Publisher name                    |
+| `description`        | TEXT        | Book description/synopsis         |
+| `cover_url`          | VARCHAR     | Cover image URL                   |
+| `shelf_location`     | VARCHAR(10) | Shelf identifier (e.g., "A", "B") |
+| `section`            | VARCHAR(10) | Section within shelf (e.g., "12") |
+| `quantity`           | INTEGER     | Total quantity in inventory       |
+| `available_quantity` | INTEGER     | Available quantity for exchange   |
+| `created_at`         | TIMESTAMP   | Record creation timestamp         |
+| `updated_at`         | TIMESTAMP   | Last update timestamp             |
 
 ### Pingo Sync Log Table
 
 Tracks all sync operations for audit purposes.
 
-| Column         | Type      | Description                              |
-|----------------|-----------|------------------------------------------|
-| `id`           | SERIAL    | Primary key                             |
-| `sync_date`    | TIMESTAMP | Sync operation timestamp                |
-| `books_synced` | INTEGER   | Number of books successfully synced     |
-| `status`       | VARCHAR   | Sync status (success/partial/failed)    |
-| `error_message`| TEXT      | Error details (if any)                  |
+| Column          | Type      | Description                          |
+| --------------- | --------- | ------------------------------------ |
+| `id`            | SERIAL    | Primary key                          |
+| `sync_date`     | TIMESTAMP | Sync operation timestamp             |
+| `books_synced`  | INTEGER   | Number of books successfully synced  |
+| `status`        | VARCHAR   | Sync status (success/partial/failed) |
+| `error_message` | TEXT      | Error details (if any)               |
 
 ## Troubleshooting
 
@@ -732,14 +762,17 @@ Tracks all sync operations for audit purposes.
 **Error:** `ECONNREFUSED` or `Connection refused`
 
 **Solution:**
+
 1. Ensure PostgreSQL is running:
+
    ```bash
    # On macOS
    brew services start postgresql
-   
+
    # On Linux
    sudo systemctl start postgresql
    ```
+
 2. Verify database credentials in `.env` file
 3. Check if the database exists:
    ```bash
@@ -751,6 +784,7 @@ Tracks all sync operations for audit purposes.
 **Error:** `EADDRINUSE: address already in use :::3000`
 
 **Solution:**
+
 1. Find the process using port 3000:
    ```bash
    lsof -i :3000
@@ -764,8 +798,8 @@ Tracks all sync operations for audit purposes.
 
 **Error:** `relation "books" does not exist`
 
-**Solution:**
-Initialize the database schema:
+**Solution:** Initialize the database schema:
+
 ```bash
 psql books_exchange < src/config/schema.sql
 ```
@@ -775,6 +809,7 @@ psql books_exchange < src/config/schema.sql
 **Error:** Book created but missing enrichment data
 
 **Solution:**
+
 - This is normal behavior - the system continues without enrichment if APIs are slow or unavailable
 - You can manually update the book information later using the PUT endpoint
 - Check your internet connection if this happens frequently
@@ -784,6 +819,7 @@ psql books_exchange < src/config/schema.sql
 **Error:** Various npm errors during installation
 
 **Solution:**
+
 1. Clear npm cache:
    ```bash
    npm cache clean --force

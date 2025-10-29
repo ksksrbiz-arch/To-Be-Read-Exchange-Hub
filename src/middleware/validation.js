@@ -16,7 +16,7 @@ const validateCreateBook = [
   body('author').optional().isString().withMessage('author must be a string'),
   body('quantity').optional().isInt({ min: 1 }).withMessage('quantity must be a positive integer'),
   body('shelf_location').optional().isString().withMessage('shelf_location must be a string'),
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 // PUT /api/books/:id
@@ -30,7 +30,7 @@ const validateUpdateBook = [
   body('section').optional().isString(),
   body('quantity').optional().isInt(),
   body('available_quantity').optional().isInt(),
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 // POST /api/sync/pingo
@@ -41,12 +41,12 @@ const validateSyncPingo = [
   body('books.*.title').optional().isString(),
   body('books.*.author').optional().isString(),
   body('books.*.quantity').optional().isInt({ min: 1 }),
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 module.exports = {
   validateCreateBook,
   validateUpdateBook,
   validateSyncPingo,
-  handleValidationErrors
+  handleValidationErrors,
 };

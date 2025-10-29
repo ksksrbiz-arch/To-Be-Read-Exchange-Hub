@@ -1,4 +1,8 @@
-const { determineStorageLocation, parseLocation, calculateOptimalLocation } = require('../src/services/inventory');
+const {
+  determineStorageLocation,
+  parseLocation,
+  calculateOptimalLocation,
+} = require('../src/services/inventory');
 const pool = require('../src/config/database');
 
 jest.mock('../src/config/database');
@@ -45,9 +49,9 @@ describe('Inventory Service', () => {
 
     test('should calculate location if no manual location provided', async () => {
       const bookData = { title: 'Test', author: 'John Smith' };
-      
+
       pool.query = jest.fn().mockResolvedValue({
-        rows: [{ next_section: 5 }]
+        rows: [{ next_section: 5 }],
       });
 
       const result = await determineStorageLocation(bookData);
@@ -61,21 +65,18 @@ describe('Inventory Service', () => {
   describe('calculateOptimalLocation', () => {
     test('should organize by author last name first letter', async () => {
       pool.query = jest.fn().mockResolvedValue({
-        rows: [{ next_section: 1 }]
+        rows: [{ next_section: 1 }],
       });
 
       const result = await calculateOptimalLocation({ author: 'Stephen King' });
 
       expect(result.shelf_location).toBe('K');
-      expect(pool.query).toHaveBeenCalledWith(
-        expect.any(String),
-        ['K']
-      );
+      expect(pool.query).toHaveBeenCalledWith(expect.any(String), ['K']);
     });
 
     test('should handle unknown author', async () => {
       pool.query = jest.fn().mockResolvedValue({
-        rows: [{ next_section: 1 }]
+        rows: [{ next_section: 1 }],
       });
 
       const result = await calculateOptimalLocation({ author: null });

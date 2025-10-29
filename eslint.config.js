@@ -1,22 +1,22 @@
 export default [
   {
-    files: ["src/**/*.js"],
+    files: ['src/**/*.js'],
     languageOptions: {
       ecmaVersion: 2021,
-      sourceType: "module",
+      sourceType: 'module',
       globals: {
-        require: "readonly",
-        module: "readonly"
-      }
+        require: 'readonly',
+        module: 'readonly',
+      },
     },
     linterOptions: {
-      reportUnusedDisableDirectives: true
+      reportUnusedDisableDirectives: true,
     },
     rules: {
-      "no-unused-vars": "warn",
-      "no-console": "off",
-      "semi": ["error", "always"],
-      "quotes": ["error", "single"]
-    }
-  }
+      'no-unused-vars': 'warn',
+      'no-console': 'off',
+      semi: ['error', 'always'],
+      quotes: ['error', 'single'],
+    },
+  },
 ];

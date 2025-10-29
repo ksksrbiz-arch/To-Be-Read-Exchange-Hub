@@ -27,9 +27,9 @@ describe('Guards and defensive behavior', () => {
           shelf_location: 'A',
           section: '1',
           quantity: 1,
-          available_quantity: 1
-        }
-      ]
+          available_quantity: 1,
+        },
+      ],
     });
 
     const response = await request(app)

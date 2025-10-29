@@ -84,7 +84,7 @@ async function calculateOptimalLocation(bookData) {
 
     return {
       shelf_location: shelf,
-      section: sectionValue.toString()
+      section: sectionValue.toString(),
     };
   } catch (error) {
     const logger = require('../utils/logger');
@@ -92,7 +92,7 @@ async function calculateOptimalLocation(bookData) {
     // Fallback to default location
     return {
       shelf_location: shelf,
-      section: '1'
+      section: '1',
     };
   }
 }
@@ -132,5 +132,5 @@ module.exports = {
   determineStorageLocation,
   parseLocation,
   calculateOptimalLocation,
-  updateInventory
+  updateInventory,
 };

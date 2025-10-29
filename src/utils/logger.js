@@ -2,7 +2,7 @@ const { createLogger, format, transports } = require('winston');
 
 const isTest = process.env.NODE_ENV === 'test';
 const logger = createLogger({
-  level: isTest ? (process.env.LOG_LEVEL || 'error') : (process.env.LOG_LEVEL || 'info'),
+  level: isTest ? process.env.LOG_LEVEL || 'error' : process.env.LOG_LEVEL || 'info',
   format: format.combine(
     format.timestamp(),
     format.errors({ stack: true }),
@@ -14,9 +14,9 @@ const logger = createLogger({
   ),
   transports: [
     new transports.Console({
-      stderrLevels: ['error']
-    })
-  ]
+      stderrLevels: ['error'],
+    }),
+  ],
 });
 
 module.exports = logger;
