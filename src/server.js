@@ -7,8 +7,12 @@ require('dotenv').config();
 
 const bookRoutes = require('./routes/books');
 const syncRoutes = require('./routes/sync');
+const healthDbRoute = require('./routes/healthDb');
 
 const app = express();
+
+// Always trust proxy for correct client IP detection behind reverse proxy (Docker, etc)
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 
 // Rate limiting middleware (configurable via env)
@@ -57,6 +61,7 @@ app.use(express.static(path.join(__dirname, '../public'), {
 // API Routes with rate limiting
 app.use('/api/books', apiLimiter, bookRoutes);
 app.use('/api/sync', syncLimiter, syncRoutes);
+app.use('/api/health/db', healthDbRoute);
 
 // Root route
 app.get('/', (req, res) => {

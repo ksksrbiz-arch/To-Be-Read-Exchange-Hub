@@ -4,4 +4,15 @@ module.exports = {
   coverageDirectory: 'coverage',
   testMatch: ['**/tests/**/*.test.js'],
   verbose: true,
+  // Coverage thresholds raised after test-hardening (88.28/82.69/95.65/88.08 achieved)
+  // Set conservatively below achieved to allow for future refactoring headroom
+  coverageThreshold: {
+    global: {
+      statements: 80,
+      branches: 70,
+      functions: 90,
+      lines: 80,
+    },
+  },
+  setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.js'],
 };
