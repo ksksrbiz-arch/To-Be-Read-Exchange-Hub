@@ -38,10 +38,20 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Disable caching for all responses in development
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+});
+
 // Serve static files with cache control
 app.use(express.static(path.join(__dirname, '../public'), {
   maxAge: 0, // Disable caching in development
-  etag: false
+  etag: false,
+  lastModified: false
 }));
 
 // API Routes with rate limiting
