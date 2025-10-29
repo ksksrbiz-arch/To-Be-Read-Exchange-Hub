@@ -28,7 +28,8 @@ storage allocation.
   names
 - **Data Enrichment**: Fetches book metadata (cover, description, publisher) from Open Library and
   Google Books APIs
-- **Bulk Operations**: Import, update, and delete books in batches (CSV/JSON support, up to 1000 books)
+- **Bulk Operations**: Import, update, and delete books in batches (CSV/JSON support, up to 1000
+  books)
 - **Pingo Sync**: Import and sync inventory data from Pingo systems
 - **Manual Override**: Option to manually specify shelf/section locations
 - **RESTful API**: Comprehensive API with interactive Swagger documentation
@@ -36,47 +37,58 @@ storage allocation.
 
 ## Quick Start
 
-Get started in 5 minutes with automated setup:
+> **🚀 Zero-Experience Setup** - See [QUICKSTART.md](QUICKSTART.md) for the absolute easiest way to get started!
+
+**Super Quick (60 seconds):**
+
+```bash
+git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
+cd To-Be-Read-Exchange-Hub
+npm install
+npm run go
+```
+
+The `npm run go` command will:
+- Auto-detect your OS
+- Offer Docker or local setup
+- Configure everything automatically
+- Start the application
+- Open your browser
+
+Visit `http://localhost:3000` to access the application.
+
+**Alternative - Traditional Setup:**
 
 ```bash
 # 1. Clone and navigate to the repository
-git clone https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub.git
+git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
 cd To-Be-Read-Exchange-Hub
 
-# 2. Run the automated setup script (recommended)
+# 2. Run the automated setup script
 npm run setup
 
 # 3. Edit .env with your database password
 nano .env
 
-# 4. Start the application
+# 4. Start the application with health checks
 npm start
 ```
 
-Visit `http://localhost:3000` to access the application.
-
-**Manual Setup (Alternative):**
-
-If you prefer manual setup or the automated script doesn't work on your system:
+**Docker Quick Start:**
 
 ```bash
-# 1. Clone repository (same as above)
-git clone https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub.git
-cd To-Be-Read-Exchange-Hub
-
-# 2. Install dependencies
-npm install
-
-# 3. Set up database
-npm run db:init
-
-# 4. Configure environment
-cp .env.example .env
-# Edit .env with your database credentials
-
-# 5. Start the application
-npm start
+docker-compose up -d
 ```
+
+Then visit `http://localhost:3000`
+
+**VS Code Dev Container:**
+
+1. Open in VS Code
+2. Click "Reopen in Container"
+3. Run `npm run dev`
+
+Everything is pre-configured!
 
 ## Prerequisites
 
@@ -248,7 +260,8 @@ Open your browser and navigate to:
 
 - **Web Interface:** `http://localhost:3000`
 - **Health Check:** `http://localhost:3000/health` (returns `{"status":"ok"}`)
-- **DB Health Check:** `http://localhost:3000/api/health/db` (returns `{"status":"ok","db":"connected"}`)
+- **DB Health Check:** `http://localhost:3000/api/health/db` (returns
+  `{"status":"ok","db":"connected"}`)
 
 If you see the web interface, you're all set! 🎉
 
@@ -295,6 +308,7 @@ The application provides a comprehensive RESTful API for managing books and sync
 ### Interactive API Documentation
 
 Visit **http://localhost:3000/api-docs** for interactive Swagger UI documentation where you can:
+
 - 📖 Browse all API endpoints with detailed descriptions
 - 🧪 Test API calls directly in your browser
 - 📋 View request/response schemas and examples
@@ -588,9 +602,11 @@ curl http://localhost:3000/api/sync/history
 
 **POST** `/api/books/bulk`
 
-Import multiple books at once from CSV file or JSON array. Perfect for initial inventory setup or large updates.
+Import multiple books at once from CSV file or JSON array. Perfect for initial inventory setup or
+large updates.
 
 **Features:**
+
 - Support for CSV file upload or JSON array
 - Automatic ISBN enrichment for all books
 - Auto-assigned storage locations
@@ -646,7 +662,7 @@ isbn,title,author,quantity,shelf_location
     {
       "id": 1,
       "isbn": "9780451524935",
-      "title": "1984",
+      "title": "1984"
       // ... other fields
     }
   ]
@@ -1354,7 +1370,8 @@ Use the `Jest Tests (Debug)` configuration to step through individual tests:
 1. Open the Run and Debug panel.
 2. Select `Jest Tests (Debug)`.
 3. Add a breakpoint in the test or source file.
-4. The runner starts paused at the first line (`--inspect-brk`). Continue execution to hit breakpoints.
+4. The runner starts paused at the first line (`--inspect-brk`). Continue execution to hit
+   breakpoints.
 
 ### 3. Attach to Docker Container
 
@@ -1387,18 +1404,19 @@ docker exec -it books-exchange-app node --inspect=0.0.0.0:9229 src/server.js
 
 - Use `console.time()` / `console.timeEnd()` for quick performance snapshots.
 - Conditional breakpoints help reduce noise (right-click breakpoint → Edit).
-- If breakpoints aren’t hit, ensure the process actually restarted with inspector and code paths executed.
+- If breakpoints aren’t hit, ensure the process actually restarted with inspector and code paths
+  executed.
 - For test debugging, narrow scope using `it.only` or pass a test file path as an argument.
 
 ### Troubleshooting Debugging
 
-| Issue | Solution |
-|-------|----------|
-| VS Code can’t attach | Ensure process started with `--inspect` or `--inspect-brk` and port 9229 exposed |
-| Breakpoints grey/hollow | File mismatch – confirm path matches workspace folder |
-| Port already in use | Kill old process: `lsof -i :9229` then `kill <pid>` |
-| Container attach fails | Map port `9229:9229` and start node with inspector inside container |
-| Jest exits before attach | Use `--inspect-brk` (configured) so execution pauses at start |
+| Issue                    | Solution                                                                         |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| VS Code can’t attach     | Ensure process started with `--inspect` or `--inspect-brk` and port 9229 exposed |
+| Breakpoints grey/hollow  | File mismatch – confirm path matches workspace folder                            |
+| Port already in use      | Kill old process: `lsof -i :9229` then `kill <pid>`                              |
+| Container attach fails   | Map port `9229:9229` and start node with inspector inside container              |
+| Jest exits before attach | Use `--inspect-brk` (configured) so execution pauses at start                    |
 
 Happy debugging! 🐞
 
