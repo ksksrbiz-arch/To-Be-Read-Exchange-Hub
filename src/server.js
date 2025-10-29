@@ -3,11 +3,13 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
+const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
 
 const bookRoutes = require('./routes/books');
 const syncRoutes = require('./routes/sync');
 const healthDbRoute = require('./routes/healthDb');
+const swaggerSpec = require('./config/swagger');
 
 const app = express();
 
@@ -63,6 +65,12 @@ app.use('/api/books', apiLimiter, bookRoutes);
 app.use('/api/sync', syncLimiter, syncRoutes);
 app.use('/api/health/db', healthDbRoute);
 
+// API Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'To-Be-Read Exchange Hub API',
+}));
+
 // Root route
 app.get('/', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -71,7 +79,29 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Health check
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     tags:
+ *       - Health
+ *     summary: Basic health check
+ *     description: Returns server status and current timestamp
+ *     responses:
+ *       200:
+ *         description: Server is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ */
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });

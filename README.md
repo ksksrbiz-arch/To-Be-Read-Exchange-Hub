@@ -291,6 +291,18 @@ You can interact with the application programmatically using the REST API. See t
 
 The application provides a comprehensive RESTful API for managing books and syncing inventory.
 
+### Interactive API Documentation
+
+Visit **http://localhost:3000/api-docs** for interactive Swagger UI documentation where you can:
+- 📖 Browse all API endpoints with detailed descriptions
+- 🧪 Test API calls directly in your browser
+- 📋 View request/response schemas and examples
+- 🔍 Explore all available parameters and data models
+
+The Swagger documentation is automatically generated from the codebase and always up-to-date.
+
+### Quick API Reference
+
 ### Books API
 
 #### Create a New Book
