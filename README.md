@@ -246,7 +246,8 @@ npm start                    # Start production server
 Open your browser and navigate to:
 
 - **Web Interface:** `http://localhost:3000`
-- **Health Check:** `http://localhost:3000/api/health` (should return `{"status":"ok"}`)
+- **Health Check:** `http://localhost:3000/health` (returns `{"status":"ok"}`)
+- **DB Health Check:** `http://localhost:3000/api/health/db` (returns `{"status":"ok","db":"connected"}`)
 
 If you see the web interface, you're all set! 🎉
 
