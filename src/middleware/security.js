@@ -49,15 +49,26 @@ const apiKeyAuth = (req, res, next) => {
   }
 
   // Constant-time comparison to prevent timing attacks
-  const isValid = validApiKeys.some(validKey => {
-    return crypto.timingSafeEqual(
-      Buffer.from(apiKey),
-      Buffer.from(validKey)
-    );
-  });
+
+  let isValid = false;
+  try {
+    isValid = validApiKeys.some(validKey => {
+      // Only compare if lengths match to avoid timingSafeEqual throw
+      if (apiKey.length !== validKey.length) return false;
+      return crypto.timingSafeEqual(
+        Buffer.from(apiKey),
+        Buffer.from(validKey)
+      );
+    });
+  } catch (e) {
+    // Defensive: treat any error as invalid
+    isValid = false;
+  }
 
   if (!isValid) {
-    req.log.warn({ path: req.path }, 'Invalid API key');
+    if (req.log && typeof req.log.warn === 'function') {
+      req.log.warn({ path: req.path }, 'Invalid API key');
+    }
     return res.status(403).json({
       success: false,
       error: 'Invalid API key',

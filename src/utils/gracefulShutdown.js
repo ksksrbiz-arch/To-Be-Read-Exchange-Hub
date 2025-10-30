@@ -45,7 +45,10 @@ class GracefulShutdown {
     const shutdownHandler = async (signal) => {
       if (this.shuttingDown) {
         logger.warn('Shutdown already in progress, force exiting...');
-        process.exit(1);
+        if (process.env.NODE_ENV !== 'test') {
+          process.exit(1);
+        }
+        return;
       }
 
       logger.info({ signal }, 'Received shutdown signal, starting graceful shutdown');
@@ -54,10 +57,14 @@ class GracefulShutdown {
       try {
         await this.shutdown();
         logger.info('Graceful shutdown completed successfully');
-        process.exit(0);
+        if (process.env.NODE_ENV !== 'test') {
+          process.exit(0);
+        }
       } catch (error) {
         logger.error({ error }, 'Error during graceful shutdown');
-        process.exit(1);
+        if (process.env.NODE_ENV !== 'test') {
+          process.exit(1);
+        }
       }
     };
 
@@ -82,7 +89,9 @@ class GracefulShutdown {
   async shutdown() {
     const shutdownTimeout = setTimeout(() => {
       logger.warn('Shutdown timeout reached, forcing exit');
-      process.exit(1);
+      if (process.env.NODE_ENV !== 'test') {
+        process.exit(1);
+      }
     }, this.options.timeout);
 
     try {

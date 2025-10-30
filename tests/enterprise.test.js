@@ -9,7 +9,9 @@ const { securityHeaders, apiKeyAuth, sanitizeInput } = require('../src/middlewar
 const { correlationId, metricsMiddleware, metricsEndpoint, register } = require('../src/middleware/observability');
 const featureFlags = require('../src/utils/featureFlags');
 const { sloMonitor } = require('../src/utils/sloMonitor');
-const GracefulShutdown = require('../src/utils/gracefulShutdown');
+// Override global mock to test real graceful shutdown behavior in this suite
+jest.unmock('../src/utils/gracefulShutdown');
+const GracefulShutdown = jest.requireActual('../src/utils/gracefulShutdown');
 
 // Ensure a deterministic environment for feature flags & API key tests
 delete process.env.API_KEY_ENABLED;
@@ -139,7 +141,8 @@ describe('Enterprise: Service Level Objectives', () => {
   test('error budget exhaustion scenario reports degraded', async () => {
     for (let i = 0; i < 20; i++) sloMonitor.recordRequest(100, true);
     const status = sloMonitor.getStatus();
-    expect(status.errorBudgetRemaining).toBeLessThanOrEqual(100);
+    // errorBudget is an object with 'remaining' property
+    expect(Number(status.errorBudget.remaining)).toBeLessThanOrEqual(100);
   });
 });
 
@@ -171,17 +174,16 @@ describe('Enterprise: Graceful Shutdown indicator', () => {
     const req = {}; const res = { status: () => ({ json: () => {} }) }; const next = () => {};
     expect(() => middleware(req, res, next)).not.toThrow();
   });
-  test('health middleware returns 503 when shutting down', () => {
+  test('health middleware returns 503 when shutting down', async () => {
     const fakeServer = { on: () => {}, close: (cb) => cb() };
     const fakePool = { end: async () => {} };
     const gs = new GracefulShutdown(fakeServer, fakePool);
     gs.shuttingDown = true;
-    const middleware = gs.healthCheckMiddleware();
-    const req = {}; let statusCode; let payload;
-    const res = { status: (c) => { statusCode = c; return { json: (p) => { payload = p; } }; } };
-    middleware(req, res, () => {});
-    expect(statusCode).toBe(503);
-    expect(payload.status).toBe('shutting_down');
+    const app = express();
+    app.get('/health-mw', gs.healthCheckMiddleware(), (req, res) => res.json({ ok: true }));
+    const res = await request(app).get('/health-mw');
+    expect(res.status).toBe(503);
+    expect(res.body.status).toBe('shutting_down');
   });
 });
 

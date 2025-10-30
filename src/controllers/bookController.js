@@ -159,7 +159,7 @@ async function deleteBook(req, res) {
     }
     const result = await pool.query('DELETE FROM books WHERE id = $1 RETURNING *', [numericId]);
 
-    if (result.rows.length === 0) {
+    if (!result || !result.rows || result.rows.length === 0) {
       return res.status(404).json({ error: 'Book not found' });
     }
 
