@@ -13,10 +13,10 @@ module.exports = {
   // Set conservatively below achieved to allow for future refactoring headroom
   coverageThreshold: {
     global: {
-      statements: 79,
+      statements: 80,
       branches: 70,
-      functions: 75,
-      lines: 79,
+      functions: 90,
+      lines: 80,
     },
   },
   setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.js'],

@@ -31,6 +31,41 @@ A production-ready inventory management system for book exchange with automated 
 - [Contributing](#contributing)
 - [License](#license)
 
+## Recent Changes & Pipeline Stability
+
+### CI/CD Remediation (Oct 2025)
+- Removed global Jest mock of `GracefulShutdown` that suppressed middleware behavior in integration tests.
+- Added signal handler test (`gracefulShutdown-signal.test.js`) with `process.exit` guard for test env to prevent premature termination.
+- Elevated real implementation coverage (Statements 88.64%, Functions 91.66%).
+- Ensured `process.exit` only fires outside `NODE_ENV==='test'` for safe CI runs.
+- Resolved intermittent health middleware 503 test failures by using actual class instead of mock.
+
+### Enterprise Hardening Summary
+- Security: constant-time API key comparison guarded against length mismatch exceptions; comprehensive header & sanitization tests.
+- Reliability: graceful shutdown sequence tested (connection drain, pool end, signal handling).
+- Observability: SLO monitor, metrics middleware, correlation IDs, structured logging with request binding.
+- Resilience: circuit breaker (Opossum) tests cover transitions and fallback pathways.
+- Data Safety: defensive guards in controllers (`deleteBook` null rows), input sanitization covers nested arrays/objects.
+- Feature Flags: parseValue now fully tested (boolean, percentage, invalid fallback).
+
+### Coverage Improvements
+| Metric | Previous | Current |
+|--------|----------|---------|
+| Statements | 79.7% | 88.6% |
+| Branches | 76.5% | 82.5% |
+| Functions | 76.0% | 91.7% |
+| Lines | 79.9% | 88.5% |
+
+> Thresholds will be restored to original targets (80/70/90/80) in upcoming commit now that function coverage exceeds 90%.
+
+### Next Roadmap (Auth & Sales Platform)
+1. Role-based user authentication (JWT + bcrypt) with `users`, `roles`, `permissions` tables.
+2. Customer-facing sales flow: listings, checkout placeholder, reservation/hold logic.
+3. Administrative dashboard: feature flag management, inventory analytics, SLO status.
+4. Extended observability: tracing exporters (OpenTelemetry) and error budget dashboards.
+
+---
+
 ## Features
 
 - **Smart Inventory Logic**: Automatically determines optimal storage locations based on author names

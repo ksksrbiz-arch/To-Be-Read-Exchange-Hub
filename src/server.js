@@ -85,6 +85,9 @@ app.use('/api/books', apiLimiter, apiKeyAuth, bookRoutes);
 app.use('/api/sync', syncLimiter, apiKeyAuth, syncRoutes);
 app.use('/api/health/db', healthDbRoute);
 
+// Auth routes (public for register/login)
+app.use('/api/auth', require('./routes/auth'));
+
 // Enterprise endpoints
 app.get('/metrics', metricsEndpoint); // Prometheus metrics
 app.get('/api/slo', (req, res) => {

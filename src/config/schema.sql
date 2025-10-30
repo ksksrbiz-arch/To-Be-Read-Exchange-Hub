@@ -29,3 +29,57 @@ CREATE TABLE IF NOT EXISTS pingo_sync_log (
     status VARCHAR(50),
     error_message TEXT
 );
+
+-- User accounts for role-based access (passwords stored as bcrypt hashes)
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    display_name VARCHAR(255),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Roles table (e.g., admin, staff, customer)
+CREATE TABLE IF NOT EXISTS roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT
+);
+
+-- Permissions table for fine-grained control (e.g., INVENTORY_READ, INVENTORY_WRITE)
+CREATE TABLE IF NOT EXISTS permissions (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT
+);
+
+-- Mapping users -> roles
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, role_id)
+);
+
+-- Mapping roles -> permissions
+CREATE TABLE IF NOT EXISTS role_permissions (
+    role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
+    permission_id INTEGER REFERENCES permissions(id) ON DELETE CASCADE,
+    PRIMARY KEY (role_id, permission_id)
+);
+
+-- Seed baseline roles & permissions (idempotent patterns)
+INSERT INTO roles (name, description) VALUES
+    ('admin', 'Platform administrator'),
+    ('staff', 'Internal staff user'),
+    ('customer', 'Customer facing user')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO permissions (code, description) VALUES
+    ('INVENTORY_READ', 'Read inventory data'),
+    ('INVENTORY_WRITE', 'Modify inventory data'),
+    ('SYNC_EXECUTE', 'Trigger sync operations'),
+    ('FEATURE_FLAG_MANAGE', 'Manage feature flags'),
+    ('SALES_CREATE_ORDER', 'Create sales orders'),
+    ('SALES_READ_ORDER', 'Read sales orders')
+ON CONFLICT (code) DO NOTHING;

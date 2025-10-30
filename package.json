@@ -38,6 +38,7 @@
     "@opentelemetry/exporter-prometheus": "^0.207.0",
     "@opentelemetry/sdk-node": "^0.207.0",
     "axios": "^1.12.2",
+    "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
@@ -46,6 +47,7 @@
     "express-rate-limit": "^8.1.0",
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "opossum": "^9.0.0",
     "papaparse": "^5.5.3",
@@ -61,8 +63,8 @@
     "eslint": "^9.38.0",
     "jest": "^30.2.0",
     "nodemon": "^3.1.10",
+    "npm": "11.6.2",
     "prettier": "^3.6.2",
-    "supertest": "^7.1.4",
-    "npm": "11.6.2"
+    "supertest": "^7.1.4"
   }
 }

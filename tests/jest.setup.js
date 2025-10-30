@@ -28,9 +28,5 @@ jest.mock('../src/config/database', () => ({
 }));
 
 
-jest.mock('../src/utils/gracefulShutdown', () => {
-  return jest.fn().mockImplementation(() => ({
-    healthCheckMiddleware: () => (req, res, next) => next(),
-    isShuttingDown: () => false,
-  }));
-});
+// Removed mock for gracefulShutdown to allow real implementation tests to run in CI.
+// process.exit guarded inside implementation when NODE_ENV==='test'.
