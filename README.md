@@ -7,6 +7,7 @@ A production-ready inventory management system for book exchange with automated 
 > 🏢 **Why This Matters:** Freeware with true purpose means professional-grade reliability, security, and maintainability that communities can trust for production use.
 
 [![99.9% SLO](https://img.shields.io/badge/SLO-99.9%25%20Availability-success)](./ENTERPRISE.md)
+[![Coverage](https://img.shields.io/badge/Coverage-pending-lightgrey)](./coverage)
 [![Full Observability](https://img.shields.io/badge/Observability-Prometheus%20%2B%20Logs-blue)](./ENTERPRISE.md)
 [![Security](https://img.shields.io/badge/Security-OWASP%20Best%20Practices-green)](./ENTERPRISE.md)
 

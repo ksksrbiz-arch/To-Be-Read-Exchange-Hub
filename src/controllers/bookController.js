@@ -152,7 +152,12 @@ async function deleteBook(req, res) {
   const { id } = req.params;
 
   try {
-    const result = await pool.query('DELETE FROM books WHERE id = $1 RETURNING *', [id]);
+    // Basic numeric validation to prevent malformed queries / early 400
+    const numericId = Number(id);
+    if (!Number.isInteger(numericId) || numericId <= 0) {
+      return res.status(400).json({ error: 'Invalid book id' });
+    }
+    const result = await pool.query('DELETE FROM books WHERE id = $1 RETURNING *', [numericId]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Book not found' });

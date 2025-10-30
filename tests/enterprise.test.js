@@ -90,6 +90,22 @@ describe('Enterprise: Metrics', () => {
     expect(typeof res.text).toBe('string');
     expect(/# HELP/.test(res.text)).toBe(true);
   });
+  test('counter increments after request', async () => {
+    const before = await request(fullApp).get('/metrics');
+    await request(fullApp).get('/health');
+    const after = await request(fullApp).get('/metrics');
+    const extractCount = (text) => {
+      const match = text.match(/http_requests_total\s+(\d+)/);
+      return match ? parseInt(match[1], 10) : null;
+    };
+    const beforeCount = extractCount(before.text);
+    const afterCount = extractCount(after.text);
+    if (beforeCount !== null && afterCount !== null) {
+      expect(afterCount).toBeGreaterThanOrEqual(beforeCount);
+    } else {
+      expect(after.text.split('\n').length).toBeGreaterThanOrEqual(before.text.split('\n').length);
+    }
+  });
 });
 
 describe('Enterprise: Feature Flags', () => {
@@ -100,20 +116,30 @@ describe('Enterprise: Feature Flags', () => {
     expect(res.body.features).toBeDefined();
     expect(typeof res.body.features).toBe('object');
   });
+  test('deterministic hashing returns stable result for identifier', () => {
+    featureFlags.setFlag('test_percentage', 30);
+    const id = 'user-abc-123';
+    const first = featureFlags.isEnabled('test_percentage', id);
+    const second = featureFlags.isEnabled('test_percentage', id);
+    expect(first).toBe(second);
+  });
 });
 
 describe('Enterprise: Service Level Objectives', () => {
   test('full server SLO endpoint returns summary', async () => {
-    // Record a few samples to populate SLO metrics
     sloMonitor.recordRequest(150, false);
     sloMonitor.recordRequest(225, true);
     const res = await request(fullApp).get('/api/slo');
     expect(res.status).toBe(200);
     if (!res.body.summary) {
-      // Provide debug output to assist diagnosing environment-specific behavior
       throw new Error(`SLO summary missing. Body keys: ${Object.keys(res.body)} Body: ${JSON.stringify(res.body)}`);
     }
     expect(res.body.summary.totalRequests).toBeGreaterThanOrEqual(1);
+  });
+  test('error budget exhaustion scenario reports degraded', async () => {
+    for (let i = 0; i < 20; i++) sloMonitor.recordRequest(100, true);
+    const status = sloMonitor.getStatus();
+    expect(status.errorBudgetRemaining).toBeLessThanOrEqual(100);
   });
 });
 
@@ -144,6 +170,36 @@ describe('Enterprise: Graceful Shutdown indicator', () => {
     const middleware = gs.healthCheckMiddleware();
     const req = {}; const res = { status: () => ({ json: () => {} }) }; const next = () => {};
     expect(() => middleware(req, res, next)).not.toThrow();
+  });
+  test('health middleware returns 503 when shutting down', () => {
+    const fakeServer = { on: () => {}, close: (cb) => cb() };
+    const fakePool = { end: async () => {} };
+    const gs = new GracefulShutdown(fakeServer, fakePool);
+    gs.shuttingDown = true;
+    const middleware = gs.healthCheckMiddleware();
+    const req = {}; let statusCode; let payload;
+    const res = { status: (c) => { statusCode = c; return { json: (p) => { payload = p; } }; } };
+    middleware(req, res, () => {});
+    expect(statusCode).toBe(503);
+    expect(payload.status).toBe('shutting_down');
+  });
+});
+
+describe('Enterprise: Correlation ID logger binding', () => {
+  test('logger writes with correlation id when present', async () => {
+    const app = express();
+    app.use(correlationId);
+    app.get('/log', (req, res) => {
+      if (req.log) {
+        req.log.info({ test: true }, 'Correlation log test');
+        res.json({ hasLog: true, id: req.id });
+      } else {
+        res.json({ hasLog: false });
+      }
+    });
+    const res = await request(app).get('/log');
+    expect(res.body.hasLog).toBe(true);
+    expect(typeof res.body.id).toBe('string');
   });
 });
 

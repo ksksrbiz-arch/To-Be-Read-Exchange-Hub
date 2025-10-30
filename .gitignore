@@ -10,3 +10,14 @@ coverage/
 dist/
 build/
 .jest-cache/
+# Local development runtime & caches (prevent large binary commits)
+.local/
+.npm-cache/
+*.pid
+*.pid.lock
+logs/
+*.tgz
+tmp/
+/.cache/
+/.eslintcache
+

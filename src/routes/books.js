@@ -7,6 +7,7 @@ const {
   updateBook,
   deleteBook,
 } = require('../controllers/bookController');
+const asyncHandler = require('../utils/asyncHandler');
 const { validateCreateBook, validateUpdateBook } = require('../middleware/validation');
 
 /**
@@ -139,7 +140,7 @@ const { validateCreateBook, validateUpdateBook } = require('../middleware/valida
  *       500:
  *         description: Server error
  */
-router.post('/', validateCreateBook, createBook);
+router.post('/', validateCreateBook, asyncHandler(createBook));
 
 /**
  * @swagger
@@ -162,7 +163,7 @@ router.post('/', validateCreateBook, createBook);
  *                   items:
  *                     $ref: '#/components/schemas/Book'
  */
-router.get('/', getBooks);
+router.get('/', asyncHandler(getBooks));
 
 /**
  * @swagger
@@ -188,7 +189,7 @@ router.get('/', getBooks);
  *       404:
  *         description: Book not found
  */
-router.get('/:id', getBookById);
+router.get('/:id', asyncHandler(getBookById));
 
 /**
  * @swagger
@@ -243,7 +244,7 @@ router.get('/:id', getBookById);
  *       404:
  *         description: Book not found
  */
-router.put('/:id', validateUpdateBook, updateBook);
+router.put('/:id', validateUpdateBook, asyncHandler(updateBook));
 
 /**
  * @swagger
@@ -273,6 +274,6 @@ router.put('/:id', validateUpdateBook, updateBook);
  *       404:
  *         description: Book not found
  */
-router.delete('/:id', deleteBook);
+router.delete('/:id', asyncHandler(deleteBook));
 
 module.exports = router;
