@@ -17,16 +17,31 @@ Enterprise-grade open source book exchange & inventory system with smart enrichm
 ## 🔑 Core Value (Why it’s Different)
 Production practices (graceful shutdown, circuit breakers, metrics, SLO tracking, feature flags, API key auth, input sanitization) already wired in — no “rewrite for prod” tax later.
 
-## 🚀 60‑Second Quick Start
+## 🚀 One-Line Installation (Fastest Way)
+
+Download, install, and run everything automatically:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/PNW-E/To-Be-Read-Exchange-Hub/main/web-install.sh | bash
+```
+
+🎉 **That's it!** Opens at <http://localhost:3000> in seconds.
+
+See [ONE-LINER-INSTALL.md](ONE-LINER-INSTALL.md) for options & customization.
+
+### Alternative: Traditional Setup
+
 ```bash
 git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
 cd To-Be-Read-Exchange-Hub
-npm install
-npm run go   # guided Docker vs local setup
+./install.sh   # fully automated
+# OR
+npm install && npm run go   # guided setup
 ```
-Then open http://localhost:3000 • Docs at /api-docs • Health at /api/health
 
-Need ultra-minimal? `docker compose up -d` (auto DB + app). Full walkthrough: see `QUICKSTART.md`.
+**Docker:** `docker compose up -d` (auto DB + app)
+
+Full walkthrough: [QUICKSTART.md](QUICKSTART.md)
 
 ## 🧩 Feature Highlights
 - Smart inventory placement & bulk import (CSV/JSON)
