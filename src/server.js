@@ -24,6 +24,8 @@ const app = express();
 
 // Always trust proxy for correct client IP detection behind reverse proxy (Docker, etc)
 app.set('trust proxy', 1);
+// Remove Express identification header for security hardening
+app.disable('x-powered-by');
 const PORT = process.env.PORT || 3000;
 
 // Rate limiting middleware (configurable via env)
@@ -86,8 +88,17 @@ app.use('/api/health/db', healthDbRoute);
 // Enterprise endpoints
 app.get('/metrics', metricsEndpoint); // Prometheus metrics
 app.get('/api/slo', (req, res) => {
-  // Service Level Objectives status
-  res.json(sloMonitor.getStatus());
+  // Service Level Objectives status (ensure summary always included)
+  const status = sloMonitor.getStatus();
+  if (!status.summary) {
+    status.summary = {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      windowSize: '30 days',
+    };
+  }
+  res.json(status);
 });
 app.get('/api/features', (req, res) => {
   // Feature flags (for admin dashboard)

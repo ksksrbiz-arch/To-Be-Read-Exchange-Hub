@@ -66,8 +66,8 @@ class SLOMonitor {
    * Record a request
    */
   recordRequest(durationMs, isError = false) {
-    this.metrics.total++;
-    if (!isError) this.metrics.success++;
+  this.metrics.requests.total++;
+  if (!isError) this.metrics.requests.success++;
     
     this.metrics.latencies.push({
       value: durationMs,
@@ -106,16 +106,16 @@ class SLOMonitor {
    * Calculate current availability
    */
   calculateAvailability() {
-    if (this.metrics.total === 0) return 100;
-    return (this.metrics.success / this.metrics.total) * 100;
+  if (this.metrics.requests.total === 0) return 100;
+  return (this.metrics.requests.success / this.metrics.requests.total) * 100;
   }
 
   /**
    * Calculate error rate
    */
   calculateErrorRate() {
-    if (this.metrics.total === 0) return 0;
-    return (this.metrics.errors.length / this.metrics.total) * 100;
+  if (this.metrics.requests.total === 0) return 0;
+  return (this.metrics.errors.length / this.metrics.requests.total) * 100;
   }
 
   /**
@@ -139,10 +139,10 @@ class SLOMonitor {
     const availability = this.calculateAvailability();
     const targetAvailability = SLO_DEFINITIONS.availability.target;
     
-    const allowedErrors = (100 - targetAvailability) * this.metrics.total / 100;
+  const allowedErrors = (100 - targetAvailability) * this.metrics.requests.total / 100;
     const actualErrors = this.metrics.errors.length;
-    
-    return Math.max(0, ((allowedErrors - actualErrors) / allowedErrors) * 100);
+  if (allowedErrors === 0) return 100; // No traffic yet => full budget remaining
+  return Math.max(0, ((allowedErrors - actualErrors) / allowedErrors) * 100);
   }
 
   /**
@@ -190,8 +190,8 @@ class SLOMonitor {
         status: errorBudget > 0 ? 'healthy' : 'exhausted',
       },
       summary: {
-        totalRequests: this.metrics.total,
-        successfulRequests: this.metrics.success,
+        totalRequests: this.metrics.requests.total,
+        successfulRequests: this.metrics.requests.success,
         failedRequests: this.metrics.errors.length,
         windowSize: '30 days',
       },

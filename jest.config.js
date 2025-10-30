@@ -4,13 +4,7 @@ module.exports = {
     'src/**/*.js',
     '!src/server.js',
     '!src/config/database.js',
-    // Exclude enterprise features pending dedicated tests
-    '!src/middleware/observability.js',
-    '!src/middleware/security.js',
-    '!src/middleware/circuitBreaker.js',
-    '!src/utils/featureFlags.js',
-    '!src/utils/gracefulShutdown.js',
-    '!src/utils/sloMonitor.js',
+    // Include enterprise middleware/utilities now that tests exist
   ],
   coverageDirectory: 'coverage',
   testMatch: ['**/tests/**/*.test.js'],

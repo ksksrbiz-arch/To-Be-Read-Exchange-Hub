@@ -16,47 +16,17 @@ global.console = {
   error: jest.fn(),
 };
 
-// Mock enterprise middleware to prevent initialization issues in tests
-jest.mock('../src/middleware/observability', () => ({
-  correlationId: (req, res, next) => {
-    req.id = 'test-request-id';
-    req.log = { info: jest.fn(), warn: jest.fn(), error: jest.fn() };
-    next();
-  },
-  metricsMiddleware: (req, res, next) => next(),
-  metricsEndpoint: (req, res) => res.end('# HELP test metrics'),
-  trackBookOperation: jest.fn(),
-  trackEnrichment: jest.fn(),
-  updateActiveConnections: jest.fn(),
+// Mock ESM-only uuid package to avoid Jest CommonJS parsing issues
+jest.mock('uuid', () => ({
+  v4: () => 'test-uuid-' + Math.random().toString(16).slice(2),
 }));
 
-jest.mock('../src/middleware/security', () => ({
-  securityHeaders: (req, res, next) => next(),
-  sanitizeInput: (req, res, next) => next(),
-  apiKeyAuth: (req, res, next) => next(),
+// Mock pg Pool to avoid real DB dependency in health db test
+jest.mock('../src/config/database', () => ({
+  query: jest.fn().mockResolvedValue({ rows: [{ '?column?': 1 }] }),
+  end: jest.fn().mockResolvedValue(),
 }));
 
-jest.mock('../src/utils/featureFlags', () => ({
-  middleware: () => (req, res, next) => {
-    req.features = {
-      isEnabled: jest.fn().mockReturnValue(true),
-      getAll: jest.fn().mockReturnValue({}),
-    };
-    next();
-  },
-  getAllFlags: jest.fn().mockReturnValue({}),
-  isEnabled: jest.fn().mockReturnValue(true),
-}));
-
-jest.mock('../src/utils/sloMonitor', () => ({
-  sloMonitor: {
-    recordRequest: jest.fn(),
-    getStatus: jest.fn().mockReturnValue({
-      availability: { current: '99.95', target: 99.9, status: 'met' },
-      latency: { p95: '100', p99: '500', status: 'met' },
-    }),
-  },
-}));
 
 jest.mock('../src/utils/gracefulShutdown', () => {
   return jest.fn().mockImplementation(() => ({
