@@ -95,7 +95,11 @@ describe('Books API', () => {
         .expect(400);
 
       expect(response.body.error).toBe('Validation error');
-      expect(response.body.details).toEqual(expect.arrayContaining([expect.objectContaining({ msg: 'Either ISBN or title is required' })]));
+      expect(response.body.details).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ msg: 'Either ISBN or title is required' }),
+        ])
+      );
     });
 
     test('should handle enrichment errors gracefully', async () => {

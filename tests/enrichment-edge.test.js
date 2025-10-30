@@ -18,23 +18,21 @@ describe('Enrichment edge cases', () => {
   });
 
   test('handles Google Books only (Open Library empty)', async () => {
-    axios.get
-      .mockResolvedValueOnce({ data: {} })
-      .mockResolvedValueOnce({
-        data: {
-          items: [
-            {
-              volumeInfo: {
-                title: 'GB Only',
-                authors: ['Solo Author'],
-                publisher: 'GB Publisher',
-                description: 'Desc',
-                imageLinks: { thumbnail: 'http://img/cover.jpg' },
-              },
+    axios.get.mockResolvedValueOnce({ data: {} }).mockResolvedValueOnce({
+      data: {
+        items: [
+          {
+            volumeInfo: {
+              title: 'GB Only',
+              authors: ['Solo Author'],
+              publisher: 'GB Publisher',
+              description: 'Desc',
+              imageLinks: { thumbnail: 'http://img/cover.jpg' },
             },
-          ],
-        },
-      });
+          },
+        ],
+      },
+    });
 
     const result = await enrichBookData('456');
     expect(result.title).toBe('GB Only');

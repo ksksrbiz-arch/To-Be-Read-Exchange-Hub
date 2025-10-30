@@ -54,11 +54,13 @@ app.use((req, res, next) => {
 });
 
 // Serve static files with cache control
-app.use(express.static(path.join(__dirname, '../public'), {
-  maxAge: 0, // Disable caching in development
-  etag: false,
-  lastModified: false
-}));
+app.use(
+  express.static(path.join(__dirname, '../public'), {
+    maxAge: 0, // Disable caching in development
+    etag: false,
+    lastModified: false,
+  })
+);
 
 // API Routes with rate limiting
 app.use('/api/books', apiLimiter, bookRoutes);
@@ -66,10 +68,14 @@ app.use('/api/sync', syncLimiter, syncRoutes);
 app.use('/api/health/db', healthDbRoute);
 
 // API Documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'To-Be-Read Exchange Hub API',
-}));
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'To-Be-Read Exchange Hub API',
+  })
+);
 
 // Root route
 app.get('/', (req, res) => {
