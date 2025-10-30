@@ -88,6 +88,9 @@ app.use('/api/health/db', healthDbRoute);
 // Auth routes (public for register/login)
 app.use('/api/auth', require('./routes/auth'));
 
+// User management routes (authenticated)
+app.use('/api/users', require('./routes/users'));
+
 // Enterprise endpoints
 app.get('/metrics', metricsEndpoint); // Prometheus metrics
 app.get('/api/slo', (req, res) => {
