@@ -2,7 +2,7 @@
  * Service Level Objectives (SLO) Monitoring
  * Tracks and reports on SLIs/SLOs for enterprise reliability
  */
-const { Histogram, Gauge } = require('prom-client');
+const { Gauge, Histogram } = require('prom-client');
 
 // SLI Metrics
 const sloAvailability = new Gauge({
@@ -11,11 +11,12 @@ const sloAvailability = new Gauge({
   labelNames: ['period'],
 });
 
+// Latency histogram for request duration percentiles (observed externally by middleware)
 const sloLatency = new Histogram({
-  name: 'slo_latency_p99',
-  help: 'P99 latency for API requests',
-  labelNames: ['endpoint'],
-  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
+  name: 'slo_latency_seconds',
+  help: 'Observed request latency distribution',
+  labelNames: ['endpoint', 'method'],
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5],
 });
 
 const sloErrorBudget = new Gauge({
@@ -65,10 +66,13 @@ class SLOMonitor {
   /**
    * Record a request
    */
-  recordRequest(durationMs, isError = false) {
-  this.metrics.requests.total++;
-  if (!isError) this.metrics.requests.success++;
-    
+  recordRequest(durationMs, isError = false, endpoint = 'generic', method = 'GET') {
+    this.metrics.requests.total++;
+    if (!isError) this.metrics.requests.success++;
+
+    // Observe latency histogram (seconds)
+    sloLatency.observe({ endpoint, method }, durationMs / 1000);
+
     this.metrics.latencies.push({
       value: durationMs,
       timestamp: Date.now(),
@@ -123,11 +127,7 @@ class SLOMonitor {
    */
   calculatePercentile(percentile) {
     if (this.metrics.latencies.length === 0) return 0;
-    
-    const sorted = this.metrics.latencies
-      .map(item => item.value)
-      .sort((a, b) => a - b);
-    
+    const sorted = this.metrics.latencies.map(item => item.value).sort((a, b) => a - b);
     const index = Math.ceil((percentile / 100) * sorted.length) - 1;
     return sorted[index];
   }
@@ -136,24 +136,19 @@ class SLOMonitor {
    * Calculate remaining error budget
    */
   calculateErrorBudget() {
-    const availability = this.calculateAvailability();
     const targetAvailability = SLO_DEFINITIONS.availability.target;
-    
-  const allowedErrors = (100 - targetAvailability) * this.metrics.requests.total / 100;
+    const allowedErrors = (100 - targetAvailability) * this.metrics.requests.total / 100;
     const actualErrors = this.metrics.errors.length;
-  if (allowedErrors === 0) return 100; // No traffic yet => full budget remaining
-  return Math.max(0, ((allowedErrors - actualErrors) / allowedErrors) * 100);
+    if (allowedErrors === 0) return 100; // No traffic yet => full budget remaining
+    return Math.max(0, ((allowedErrors - actualErrors) / allowedErrors) * 100);
   }
 
   /**
    * Update Prometheus metrics
    */
   updateMetrics() {
-    const availability = this.calculateAvailability();
-    const errorBudget = this.calculateErrorBudget();
-    
-    sloAvailability.set({ period: '30d' }, availability);
-    sloErrorBudget.set({ period: '30d' }, errorBudget);
+    sloAvailability.set({ period: '30d' }, this.calculateAvailability());
+    sloErrorBudget.set({ period: '30d' }, this.calculateErrorBudget());
   }
 
   /**
@@ -205,4 +200,5 @@ const sloMonitor = new SLOMonitor();
 module.exports = {
   sloMonitor,
   SLO_DEFINITIONS,
+  sloLatency, // exported for metrics middleware & tests
 };

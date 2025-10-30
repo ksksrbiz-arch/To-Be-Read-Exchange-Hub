@@ -1,402 +1,103 @@
+git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
+git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
+docker-compose up -d
+git clone https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub.git
+git clone https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub.git
+npm test                     # Run all tests with coverage
 # 📚 To-Be-Read Exchange Hub
 
-**Enterprise-Grade Open Source Book Exchange Platform**
+Enterprise-grade open source book exchange & inventory system with smart enrichment, resilient architecture, and production hardening you normally only see in paid platforms.
 
-A production-ready inventory management system for book exchange with automated data enrichment, intelligent storage allocation, and enterprise-level observability, security, and reliability features.
+[![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen)](./TEST-RESULTS.md) [![Coverage](https://img.shields.io/badge/Coverage-88%25-blue)](./coverage/lcov-report/index.html) [![Lint](https://img.shields.io/badge/Lint-Clean-success)](./eslint.config.mjs)
 
-> 🏢 **Why This Matters:** Freeware with true purpose means professional-grade reliability, security, and maintainability that communities can trust for production use.
+[![99.9% SLO](https://img.shields.io/badge/SLO-99.9%25%20Availability-success)](./ENTERPRISE.md) [![Observability](https://img.shields.io/badge/Observability-Prometheus%20%2B%20Structured%20Logs-blue)](./ENTERPRISE.md) [![Security](https://img.shields.io/badge/Security-OWASP%20Hardened-green)](./ENTERPRISE.md)
 
-[![99.9% SLO](https://img.shields.io/badge/SLO-99.9%25%20Availability-success)](./ENTERPRISE.md)
-[![Coverage](https://img.shields.io/badge/Coverage-pending-lightgrey)](./coverage)
-[![Full Observability](https://img.shields.io/badge/Observability-Prometheus%20%2B%20Logs-blue)](./ENTERPRISE.md)
-[![Security](https://img.shields.io/badge/Security-OWASP%20Best%20Practices-green)](./ENTERPRISE.md)
+> Built for communities that need reliability without vendor lock‑in. Clinical startup discipline + hobby project heart.
 
-## Table of Contents
+## 🔑 Core Value (Why it’s Different)
+Production practices (graceful shutdown, circuit breakers, metrics, SLO tracking, feature flags, API key auth, input sanitization) already wired in — no “rewrite for prod” tax later.
 
-- [Features](#features)
-- [🏢 Enterprise Features](#-enterprise-features)
-- [Quick Start](#quick-start)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [API Documentation](#api-documentation)
-- [Smart Inventory Logic](#smart-inventory-logic)
-- [Data Enrichment](#data-enrichment)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Development](#development)
-- [Database Schema](#database-schema)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
+## 🚀 60‑Second Quick Start
+```bash
+git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
+cd To-Be-Read-Exchange-Hub
+npm install
+npm run go   # guided Docker vs local setup
+```
+Then open http://localhost:3000 • Docs at /api-docs • Health at /api/health
 
-## Recent Changes & Pipeline Stability
+Need ultra-minimal? `docker compose up -d` (auto DB + app). Full walkthrough: see `QUICKSTART.md`.
 
-### CI/CD Remediation (Oct 2025)
-- Removed global Jest mock of `GracefulShutdown` that suppressed middleware behavior in integration tests.
-- Added signal handler test (`gracefulShutdown-signal.test.js`) with `process.exit` guard for test env to prevent premature termination.
-- Elevated real implementation coverage (Statements 88.64%, Functions 91.66%).
-- Ensured `process.exit` only fires outside `NODE_ENV==='test'` for safe CI runs.
-- Resolved intermittent health middleware 503 test failures by using actual class instead of mock.
+## 🧩 Feature Highlights
+- Smart inventory placement & bulk import (CSV/JSON)
+- Automatic enrichment (Open Library / Google Books)
+- Robust REST API + interactive Swagger docs
+- Resilience: circuit breaker, rate limiting, graceful shutdown
+- Observability: Prometheus metrics, correlation IDs, structured logs, SLO endpoint
+- Security: hardened headers (Helmet), API key layer, deep sanitization
+- Feature flags for safe progressive delivery
 
-### Enterprise Hardening Summary
-- Security: constant-time API key comparison guarded against length mismatch exceptions; comprehensive header & sanitization tests.
-- Reliability: graceful shutdown sequence tested (connection drain, pool end, signal handling).
-- Observability: SLO monitor, metrics middleware, correlation IDs, structured logging with request binding.
-- Resilience: circuit breaker (Opossum) tests cover transitions and fallback pathways.
-- Data Safety: defensive guards in controllers (`deleteBook` null rows), input sanitization covers nested arrays/objects.
-- Feature Flags: parseValue now fully tested (boolean, percentage, invalid fallback).
+Full enterprise rationale & patterns: `ENTERPRISE.md` • Architecture & internals: `IMPLEMENTATION.md`.
 
-### Coverage Improvements
-| Metric | Previous | Current |
-|--------|----------|---------|
-| Statements | 79.7% | 88.6% |
-| Branches | 76.5% | 82.5% |
-| Functions | 76.0% | 91.7% |
-| Lines | 79.9% | 88.5% |
+## 🛠 Prerequisites (Local Path)
+Node.js ≥ 18, PostgreSQL ≥ 12. (Dev container & Docker eliminate local installs.)
 
-> Thresholds will be restored to original targets (80/70/90/80) in upcoming commit now that function coverage exceeds 90%.
+## ⚙️ First-Time Install (Manual Minimal)
+```bash
+git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
+cd To-Be-Read-Exchange-Hub
+cp .env.example .env   # set DB_PASSWORD
+npm install            # prefer: npm ci (CI environments)
+npm run db:init        # creates & seeds schema idempotently
+npm start              # health checked smart start
+```
+Visit http://localhost:3000 and confirm `{"status":"ok"}` at /api/health.
 
-### Next Roadmap (Auth & Sales Platform)
-1. Role-based user authentication (JWT + bcrypt) with `users`, `roles`, `permissions` tables.
-2. Customer-facing sales flow: listings, checkout placeholder, reservation/hold logic.
-3. Administrative dashboard: feature flag management, inventory analytics, SLO status.
-4. Extended observability: tracing exporters (OpenTelemetry) and error budget dashboards.
+## ⚡ Recommended Fast Path Improvements
+We aggressively trimmed first-run friction. Planned next tweaks:
+- Combine env creation + DB init under a single `bootstrap` script.
+- Use `npm ci` when lockfile present for faster deterministic installs.
+- Parallelize DB schema + dependency install where shell supports (`&` background).
+- Auto-detect missing PostgreSQL and fallback to ephemeral Docker postgres (`npm run bootstrap -- --ephemeral-db`).
+- Cache build layers in Dockerfile (multi-stage already partially supported — see upcoming PR).
+
+## 📜 Essential Scripts
+| Action | Command | Notes |
+| ------ | ------- | ----- |
+| Guided setup | `npm run go` | Interactive bootstrap (Docker vs local) |
+| Full setup | `npm run setup` | Unified bootstrap (env + deps + optional DB + tests) |
+| DB init | `npm run db:init` | Idempotent schema + seed roles/permissions |
+| Dev mode | `npm run dev` | Nodemon autoreload |
+| Tests | `npm test` | Coverage ≥ 88% (functions > 90%) |
+| Verify | `npm run verify` | Lint + format check + tests |
+| Start (prod) | `npm start` | Smart start w/ health polling |
+| Stop | `npm run stop` | Graceful shutdown |
+
+## 🧪 Quality Snapshot (Oct 2025)
+Coverage: Statements 88.6% • Branches 82.5% • Functions 91.7% • Lines 88.5%.
+Resilience & security layers covered by dedicated tests (graceful shutdown, circuit breaker transitions, header & sanitization, feature flag parsing).
+
+## 🔍 API & Docs
+Swagger UI at `/api-docs` (live schemas + try-it). Prometheus metrics at `/metrics`. SLO status at `/api/slo`. Feature flags at `/api/features`.
+
+## 🧱 Database Shape (High Level)
+`books`, `users`, `roles`, `permissions`, mapping tables, sync log. See `schema.sql` for details.
+
+## 🤝 Contribute
+Read `CONTRIBUTING.md` then run:
+```bash
+npm run verify
+```
+Open issues for roadmap items (RBAC extension, sales flow, tracing exporters). We welcome focused improvements over broad rewrites.
+
+## 📄 License
+ISC — permissive use. Attribution appreciated but not required.
+
+## 🔗 Deep Dive References
+`ENTERPRISE.md` • `IMPLEMENTATION.md` • `QUICKSTART.md` • `SECURITY-STATUS.md` • `STABILITY-REPORT.md`
 
 ---
-
-## Features
-
-- **Smart Inventory Logic**: Automatically determines optimal storage locations based on author names
-- **Data Enrichment**: Fetches book metadata (cover, description, publisher) from Open Library and Google Books APIs
-- **Bulk Operations**: Import, update, and delete books in batches (CSV/JSON support, up to 1000 books)
-- **Pingo Sync**: Import and sync inventory data from Pingo systems
-- **Manual Override**: Option to manually specify shelf/section locations
-- **RESTful API**: Comprehensive API with interactive Swagger documentation
-- **Responsive UI**: Modern web interface for managing inventory
-
-## 🏢 Enterprise Features
-
-**What makes this freeware stand out as production-grade software:**
-
-### Observability & Monitoring
-
-- 📊 **Prometheus Metrics** - Complete HTTP, business, and SLO metrics at `/metrics`
-- 🔍 **Request Tracing** - Correlation IDs for distributed tracing (`X-Request-ID`)
-- 📝 **Structured Logging** - JSON logs with Winston for centralized analysis
-- 🎯 **SLO Tracking** - 99.9% availability target with error budget monitoring
-
-### Security & Compliance
-
-- 🛡️ **Security Headers** - Helmet.js with OWASP best practices (CSP, HSTS, XSS protection)
-- 🔐 **API Key Auth** - Optional authentication layer for production deployments
-- 🧹 **Input Sanitization** - Protection against injection attacks and XSS
-- ⚡ **Rate Limiting** - Configurable request throttling per endpoint
-
-### Reliability & Resilience
-
-- 🔌 **Circuit Breakers** - Prevent cascading failures with automatic fallback (Opossum)
-- 💚 **Health Checks** - Liveness and readiness probes for Kubernetes/Docker
-- 🔄 **Graceful Shutdown** - Zero-downtime deployments with connection draining
-- 📉 **SLO Monitoring** - Real-time availability and latency tracking
-
-### Performance & Scale
-
-- ⚡ **Response Compression** - Gzip compression (60-80% bandwidth reduction)
-- 🎯 **Connection Pooling** - Optimized PostgreSQL connection management
-- 📦 **Smart Caching** - Cache headers for static assets
-- 🚀 **Async Operations** - Non-blocking I/O throughout
-
-### Developer Experience
-
-- 🎚️ **Feature Flags** - Safe rollout of new features without deployments
-- 📖 **API Versioning** - Future-proof with `/api/v1` namespace
-- 🧪 **70 Tests** - Comprehensive test suite with 88%+ coverage
-- 📚 **Full Documentation** - Enterprise-grade docs in `ENTERPRISE.md`
-
-> 📘 See [**ENTERPRISE.md**](./ENTERPRISE.md) for complete documentation on all enterprise features, configuration options, and best practices.
-
-## Quick Start
-
-> **🚀 Zero-Experience Setup** - See [QUICKSTART.md](QUICKSTART.md) for the absolute easiest way to get started!
-
-**Super Quick (60 seconds):**
-
-```bash
-git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
-cd To-Be-Read-Exchange-Hub
-npm install
-npm run go
-```
-
-The `npm run go` command will:
-- Auto-detect your OS
-- Offer Docker or local setup
-- Configure everything automatically
-- Start the application
-- Open your browser
-
-Visit `http://localhost:3000` to access the application.
-
-**Alternative - Traditional Setup:**
-
-```bash
-# 1. Clone and navigate to the repository
-git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
-cd To-Be-Read-Exchange-Hub
-
-# 2. Run the automated setup script
-npm run setup
-
-# 3. Edit .env with your database password
-nano .env
-
-# 4. Start the application with health checks
-npm start
-```
-
-**Docker Quick Start:**
-
-```bash
-docker-compose up -d
-```
-
-Then visit `http://localhost:3000`
-
-**VS Code Dev Container:**
-
-1. Open in VS Code
-2. Click "Reopen in Container"
-3. Run `npm run dev`
-
-Everything is pre-configured!
-
-## Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- **Node.js** (v18 or higher) - [Download here](https://nodejs.org/) (tested on Node 20 LTS)
-- **PostgreSQL** (v12 or higher) - [Download here](https://www.postgresql.org/download/)
-- **npm** (comes with Node.js)
-
-## Installation
-
-You can set up the application using either the **automated setup script** (recommended) or follow
-the **manual steps** below.
-
-### Option A: Automated Setup (Recommended)
-
-The automated setup script will check prerequisites, install dependencies, configure environment,
-and set up the database:
-
-```bash
-# Clone the repository
-git clone https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub.git
-cd To-Be-Read-Exchange-Hub
-
-# Run automated setup
-npm run setup
-
-# Edit .env with your database password
-nano .env
-
-# Start the server
-npm start
-```
-
-The setup script will:
-
-- ✅ Verify Node.js and PostgreSQL are installed
-- ✅ Install all npm dependencies
-- ✅ Create .env file from template
-- ✅ Set up and initialize the database
-- ✅ Run tests to verify installation
-
-### Option B: Manual Installation
-
-Follow these detailed steps to set up the application manually:
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub.git
-cd To-Be-Read-Exchange-Hub
-```
-
-### 2. Install Dependencies
-
-Install all required Node.js packages:
-
-```bash
-npm install
-```
-
-This will install Express.js, PostgreSQL client, API libraries, and other dependencies.
-
-### 3. Set Up PostgreSQL Database
-
-Create a new PostgreSQL database for the application:
-
-```bash
-# Create the database
-createdb books_exchange
-
-# Initialize the database schema
-psql books_exchange < src/config/schema.sql
-```
-
-**Note**: Make sure PostgreSQL is running before executing these commands.
-
-### 4. Configure Environment Variables
-
-Copy the example environment file and customize it with your settings:
-
-```bash
-cp .env.example .env
-```
-
-Open the `.env` file and update the variables according to your environment. The `.env.example` file
-contains all required configuration options with sensible defaults.
-
-**Required Configuration:**
-
-```env
-# Server Configuration
-PORT=3000                    # Port for the application
-NODE_ENV=development         # Environment: development or production
-LOG_LEVEL=info               # Logging level (error, warn, info, debug)
-
-# Rate Limiting
-API_RATE_WINDOW_MIN=15       # API rate limit window in minutes
-API_RATE_MAX=100             # Maximum API requests per IP per window
-SYNC_RATE_WINDOW_MIN=15      # Sync rate limit window in minutes
-SYNC_RATE_MAX=10             # Maximum sync requests per window
-
-# Database Configuration
-DB_USER=postgres             # Your PostgreSQL username
-DB_HOST=localhost            # Database host
-DB_NAME=books_exchange       # Database name
-DB_PASSWORD=your_password    # Your PostgreSQL password (⚠️ CHANGE THIS!)
-DB_PORT=5432                 # PostgreSQL port (default: 5432)
-```
-
-**Important Notes:**
-
-- ⚠️ **Security:** Always change `DB_PASSWORD` from the default value
-- 📋 See `.env.example` for the complete list of configuration options
-- 🔒 Never commit your `.env` file to version control (it's in `.gitignore`)
-- 🚀 For production, set `NODE_ENV=production` and use stronger passwords
-
-### 5. Start the Application
-
-Start the server in production mode:
-
-```bash
-npm start
-```
-
-The application will be available at `http://localhost:3000`
-
-**Expected output:**
-
-```text
-Server running on port 3000
-Database connected successfully
-```
-
-**Development Mode:**
-
-For development with auto-reload on file changes:
-
-```bash
-npm run dev
-```
-
-**Additional Commands:**
-
-```bash
-# Setup & Database
-npm run setup                # Run complete automated setup (first-time setup)
-npm run db:init              # Initialize database only
-
-# Development
-npm run dev                  # Start with auto-reload (development mode)
-npm test                     # Run all tests with coverage
-npm run test:watch           # Run tests in watch mode
-
-# Code Quality
-npm run lint                 # Check for code errors
-npm run format               # Auto-format all code
-npm run format:check         # Check if code is formatted
-npm run verify               # Run lint + format check + tests (pre-commit)
-
-# Production
-npm run build                # Build production artifacts
-npm start                    # Start production server
-```
-
-**Verify Installation:**
-
-Open your browser and navigate to:
-
-- **Web Interface:** `http://localhost:3000`
-- **Health Check:** `http://localhost:3000/health` (returns `{"status":"ok"}`)
-- **DB Health Check:** `http://localhost:3000/api/health/db` (returns
-  `{"status":"ok","db":"connected"}`)
-
-If you see the web interface, you're all set! 🎉
-
-## Configuration
-
-### Environment Variables
-
-| Variable               | Description                                  | Default          |
-| ---------------------- | -------------------------------------------- | ---------------- |
-| `PORT`                 | Application server port                      | `3000`           |
-| `NODE_ENV`             | Environment mode                             | `development`    |
-| `LOG_LEVEL`            | Logger level (`error`, `warn`, `info`, etc.) | `info`           |
-| `API_RATE_WINDOW_MIN`  | API rate limit window (minutes)              | `15`             |
-| `API_RATE_MAX`         | Max API requests per IP per window           | `100`            |
-| `SYNC_RATE_WINDOW_MIN` | Sync rate limit window (minutes)             | `15`             |
-| `SYNC_RATE_MAX`        | Max sync requests per window                 | `10`             |
-| `DB_USER`              | PostgreSQL username                          | `postgres`       |
-| `DB_HOST`              | Database host address                        | `localhost`      |
-| `DB_NAME`              | Database name                                | `books_exchange` |
-| `DB_PASSWORD`          | PostgreSQL password                          | `postgres`       |
-| `DB_PORT`              | PostgreSQL port                              | `5432`           |
-
-## Usage
-
-### Web Interface
-
-1. Open your browser and navigate to `http://localhost:3000`
-2. Use the web interface to:
-   - Add new books (manually or via ISBN lookup)
-   - View and search your inventory
-   - Update book information
-   - Sync with Pingo systems
-   - Manage shelf locations
-
-### API Usage
-
-You can interact with the application programmatically using the REST API. See the
-[API Documentation](#api-documentation) section below for details.
-
-## API Documentation
-
-The application provides a comprehensive RESTful API for managing books and syncing inventory.
-
-### Interactive API Documentation
-
-Visit **http://localhost:3000/api-docs** for interactive Swagger UI documentation where you can:
-
-- 📖 Browse all API endpoints with detailed descriptions
-- 🧪 Test API calls directly in your browser
-- 📋 View request/response schemas and examples
-- 🔍 Explore all available parameters and data models
-
-The Swagger documentation is automatically generated from the codebase and always up-to-date.
+Lean README by design — everything else lives in specialized docs. If something feels missing here, it probably has its own file.
 
 ### Quick API Reference
 
@@ -415,406 +116,125 @@ Creates a new book with smart inventory logic and automatic data enrichment.
   "isbn": "9780747532743", // Required (if title not provided)
   "title": "Harry Potter...", // Required (if ISBN not provided)
   "author": "J.K. Rowling", // Optional (auto-filled from ISBN)
-  "quantity": 5, // Required
-  "shelf_location": "A-12" // Optional (manual override)
-}
-```
-
-**Success Response (201):**
-
-```json
-{
-  "success": true,
-  "book": {
-    "id": 1,
-    "isbn": "9780747532743",
-    "title": "Harry Potter and the Philosopher's Stone",
-    "author": "J.K. Rowling",
-    "publisher": "Bloomsbury",
-    "description": "...",
-    "cover_url": "http://...",
-    "shelf_location": "A",
-    "section": "12",
-    "quantity": 5,
-    "available_quantity": 5
-  }
-}
-```
-
-**Example:**
-
-```bash
-curl -X POST http://localhost:3000/api/books \
-  -H "Content-Type: application/json" \
-  -d '{
-    "isbn": "9780747532743",
-    "quantity": 5
-  }'
-```
-
----
-
-#### Get All Books
-
-**GET** `/api/books`
-
-Retrieves all books in the inventory.
-
-**Success Response (200):**
-
-```json
-{
-  "success": true,
-  "books": [
-    {
-      "id": 1,
-      "isbn": "9780747532743",
-      "title": "Harry Potter..."
-      // ... other book fields
-    }
-  ]
-}
-```
-
-**Example:**
-
-```bash
-curl http://localhost:3000/api/books
-```
-
----
-
-#### Get a Specific Book
-
-**GET** `/api/books/:id`
-
-Retrieves a single book by its ID.
-
-**Parameters:**
-
-- `id` - Book ID (integer)
-
-**Success Response (200):**
-
-```json
-{
-  "success": true,
-  "book": {
-    "id": 1
-    // ... book fields
-  }
-}
-```
-
-**Error Response (404):**
-
-```json
-{
-  "success": false,
-  "error": "Book not found"
-}
-```
-
----
-
-#### Update a Book
-
-**PUT** `/api/books/:id`
-
-Updates an existing book's information.
-
-**Parameters:**
-
-- `id` - Book ID (integer)
-
-**Request Body:**
-
-```json
-{
-  "title": "Updated Title", // Optional
-  "author": "Updated Author", // Optional
-  "quantity": 10, // Optional
-  "shelf_location": "B-5" // Optional
-}
-```
-
-**Success Response (200):**
-
-```json
-{
-  "success": true,
-  "book": {
-    // ... updated book fields
-  }
-}
-```
-
----
-
-#### Delete a Book
-
-**DELETE** `/api/books/:id`
-
-Removes a book from the inventory.
-
-**Parameters:**
-
-- `id` - Book ID (integer)
-
-**Success Response (200):**
-
-```json
-{
-  "success": true,
-  "message": "Book deleted successfully"
-}
-```
-
----
-
-### Sync API
-
-#### Sync Pingo Inventory
 
 **POST** `/api/sync/pingo`
-
-Imports and synchronizes inventory data from Pingo systems.
-
-**Request Body:**
-
-```json
-{
-  "books": [
-    {
-      "isbn": "9780747532743",
-      "title": "Book Title",
-      "author": "Author Name",
-      "quantity": 5
-    },
-    {
-      "isbn": "9780061120084",
-      "title": "Another Book",
-      "author": "Another Author",
-      "quantity": 3
-    }
-  ]
 }
-```
-
-**Success Response (200):**
-
-```json
-{
-  "success": true,
-  "booksSynced": 2,
-  "totalBooks": 2,
-  "errors": []
-}
-```
-
-**Partial Success Response (200):**
-
-```json
-{
-  "success": true,
-  "booksSynced": 1,
-  "totalBooks": 2,
-  "errors": [
-    {
-      "book": { "isbn": "...", "title": "..." },
-      "error": "Error message"
-    }
-  ]
-}
-```
-
-**Example:**
-
-```bash
-curl -X POST http://localhost:3000/api/sync/pingo \
-  -H "Content-Type: application/json" \
-  -d '{
-    "books": [
-      {
-        "isbn": "9780747532743",
         "title": "Harry Potter",
-        "author": "J.K. Rowling",
-        "quantity": 5
-      }
-    ]
-  }'
-```
+  # 📚 To-Be-Read Exchange Hub
 
----
+  Enterprise-grade open source book exchange platform with smart inventory, automated metadata enrichment, bulk + sync operations, and built-in production concerns (security, observability, resilience).
 
-#### Get Sync History
+  [![99.9% SLO](https://img.shields.io/badge/SLO-99.9%25%20Availability-success)](./ENTERPRISE.md) [![Observability](https://img.shields.io/badge/Observability-Metrics%20%2B%20Logs-blue)](./ENTERPRISE.md) [![Security](https://img.shields.io/badge/Security-OWASP-green)](./ENTERPRISE.md)
 
-**GET** `/api/sync/history`
+  > Built to feel like a maintained enterprise product—while staying community friendly.
 
-Retrieves the history of all sync operations.
+  ## 🔥 Core Highlights (1‑screen)
 
-**Success Response (200):**
+  | Category | What You Get |
+  |----------|---------------|
+  | Inventory | Auto shelf allocation by author + manual overrides |
+  | Enrichment | ISBN lookups (Open Library + Google Books fallback merge) |
+  | Bulk & Sync | CSV / JSON import, batch update/delete, external Pingo sync |
+  | Reliability | Circuit breaker, graceful shutdown, health/readiness endpoints |
+  | Observability | Prometheus metrics, structured JSON logs, correlation IDs, SLO monitor |
+  | Security | Helmet headers, rate limiting, input sanitization, API key option |
+  | Dev UX | Feature flags, 70+ tests (>88% statements), instant quickstart script |
 
-```json
-{
-  "success": true,
-  "history": [
-    {
-      "id": 1,
-      "sync_date": "2024-01-15T10:30:00Z",
-      "books_synced": 10,
-      "status": "success",
-      "error_message": null
-    }
-  ]
-}
-```
+  Full deep-dive: see `ENTERPRISE.md`, `IMPLEMENTATION.md` & `QUICKSTART.md`.
 
-**Example:**
+## 🚀 60‑Second Start
 
-```bash
-curl http://localhost:3000/api/sync/history
-```
+  Pick ONE path:
 
----
+  ```bash
+# (A) Unified bootstrap (recommended)
+git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
+cd To-Be-Read-Exchange-Hub
+bash scripts/bootstrap.sh --interactive --seed-vintage   # guided + sample vintage data
 
-### Bulk Operations API
+# (B) Minimal manual
+  git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
+  cd To-Be-Read-Exchange-Hub
+  npm run setup     # creates .env, optional DB init, runs tests
+  nano .env         # set DB_PASSWORD (change default!)
 
-#### Bulk Import Books
 
-**POST** `/api/books/bulk`
+# (C) Docker one-liner
+  docker compose up -d --build
+  ```
 
-Import multiple books at once from CSV file or JSON array. Perfect for initial inventory setup or
-large updates.
+Visit: `http://localhost:3000` (UI) • `/api-docs` (Swagger) • `/api/health` (health JSON)
+Vintage seed flag: `--seed-vintage` loads curated classic titles (see `scripts/lib/seed-vintage.sql`).
 
-**Features:**
+  ## ✅ Prerequisites (Local Path Only)
+  Node.js ≥18 (tested on 20 LTS) • PostgreSQL ≥12 • npm (bundled). For container/Docker users, these are already handled.
 
-- Support for CSV file upload or JSON array
-- Automatic ISBN enrichment for all books
-- Auto-assigned storage locations
-- Transaction-safe (rollback on critical failure)
-- Partial success support (continues processing even if some books fail)
-- Maximum 1000 books per batch
+  ## ⚙️ Essential Configuration
 
-**Request Body (JSON):**
+  Create `.env` (auto-generated by scripts) or copy from `.env.example`:
+  ```env
+  PORT=3000
+  NODE_ENV=development
+  LOG_LEVEL=info
+  DB_HOST=localhost
+  DB_NAME=books_exchange
+  DB_USER=postgres
+  DB_PASSWORD=CHANGE_ME
+  DB_PORT=5432
+  ```
+  Security tips: never commit `.env`; always replace default password; use `NODE_ENV=production` in prod.
 
-```json
-{
-  "books": [
-    {
-      "isbn": "9780451524935",
-      "quantity": 5
-    },
-    {
-      "title": "The Great Gatsby",
-      "author": "F. Scott Fitzgerald",
-      "quantity": 3,
-      "shelf_location": "A-5"
-    }
-  ]
-}
-```
+  ## 🧠 Smart Inventory + Enrichment (Quick View)
+  - Shelf auto = first letter of author last name; section increments per shelf.
+  - Manual override accepts `A-12`, `A`, or `Shelf A, Section 12`.
+  - ISBN triggers enrichment → merges title/author/publisher/description/cover from multiple sources with graceful fallback.
 
-**Request (CSV File):**
+  ## 🛠️ Common Scripts
+  ```bash
+  npm run go         # guided quickstart (Docker or local)
+  npm run setup      # bootstrap automation + optional DB init + tests
+  npm start          # start server (after setup) + then run smoke if desired
+  npm run smoke      # basic health + books endpoint smoke probe
+  npm run dev        # nodemon hot reload
+  npm test           # jest coverage
+  npm run db:init    # (re)initialize schema
+  npm run verify     # lint + format:check + tests
+  ```
 
-```bash
-curl -X POST http://localhost:3000/api/books/bulk \
-  -F "file=@books.csv"
-```
+  ## 🔍 API & Docs
+  Interactive Swagger: `/api-docs`. Core endpoints: `/api/books`, `/api/books/bulk`, `/api/sync/pingo`, `/api/health`, `/metrics`. For full request/response examples consult Swagger or `tests/*.test.js`.
 
-**CSV Format:**
+  ## 🏗️ Structure (Condensed)
+  ```
+  src/
+    server.js          # entry
+    controllers/       # book, bulk, sync logic
+    services/          # enrichment, inventory algorithms
+    middleware/        # auth, validation, circuit breaker, observability
+    routes/            # REST endpoint wiring
+    utils/             # logger, feature flags, shutdown, SLO monitor
+  scripts/             # setup + quickstart + deploy helpers
+  public/              # static UI
+  tests/               # 70+ unit/integration suites
+  ```
 
-```csv
-isbn,title,author,quantity,shelf_location
-9780451524935,1984,George Orwell,5,
-9780061120084,To Kill a Mockingbird,Harper Lee,3,A-5
-```
+  ## 🧪 Quality Snapshot
+  Statements ~88% • Functions >91% • Resilience, security & shutdown flows covered. See `TEST-RESULTS.md` & coverage/ for details.
 
-**Success Response (201):**
+  ## 🔐 Production Fast Checklist
+  1. Set strong `DB_PASSWORD`, change rate limits if needed.
+  2. Run `npm run build` then `NODE_ENV=production npm start` or use Docker.
+  3. Point monitoring at `/metrics` and `/api/health`.
+  4. Enable API key auth (see `ENTERPRISE.md`).
+  5. Configure backups for PostgreSQL.
 
-```json
-{
-  "success": true,
-  "message": "Imported 2 of 2 books",
-  "total": 2,
-  "successful": 2,
-  "failed": 0,
-  "errors": [],
-  "books": [
-    {
-      "id": 1,
-      "isbn": "9780451524935",
-      "title": "1984"
-      // ... other fields
-    }
-  ]
-}
-```
+  ## 🤝 Contributing
+  Fork → branch → changes + tests → `npm run verify` → PR. High‑signal improvements welcome (tests/docs/perf/security). See `CONTRIBUTING.md`.
 
-**Partial Success Response (207):**
+  ## 📄 License
+  ISC License (see `LICENSE`).
 
-```json
-{
-  "success": false,
-  "message": "Imported 1 of 2 books",
-  "total": 2,
-  "successful": 1,
-  "failed": 1,
-  "errors": [
-    {
-      "row": 2,
-      "book": { "isbn": "123", "title": "Bad Book" },
-      "error": "Valid quantity (>=1) is required"
-    }
-  ],
-  "books": [...]
-}
-```
-
----
-
-#### Bulk Update Books
-
-**PUT** `/api/books/bulk`
-
-Update multiple books in a single request. Maximum 500 updates per batch.
-
-**Request Body:**
-
-```json
-{
-  "updates": [
-    {
-      "id": 1,
-      "fields": {
-        "quantity": 10,
-        "shelf_location": "A-5"
-      }
-    },
-    {
-      "id": 2,
-      "fields": {
-        "author": "Updated Author Name",
-        "available_quantity": 5
-      }
-    }
-  ]
-}
-```
-
-**Success Response (200):**
-
-```json
-{
-  "success": true,
-  "message": "Updated 2 of 2 books",
-  "total": 2,
-  "successful": 2,
-  "failed": 0,
-  "errors": []
-}
-```
-
+  Made with ❤️ for book communities. If this helps you, share a book forward.
 **Example:**
 
 ```bash

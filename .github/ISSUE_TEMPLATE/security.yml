@@ -1,0 +1,101 @@
+name: 🔒 Security Vulnerability
+description: Report a security vulnerability (PRIVATE - will be handled confidentially)
+title: "[SECURITY] "
+labels: ["security", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **IMPORTANT**: If this is a critical vulnerability, please report it privately via email to security@example.com instead of opening a public issue.
+        
+        For less critical issues, please continue with this form.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Vulnerability Description
+      description: Describe the security issue (be specific but avoid exploitation details)
+      placeholder: What is the vulnerability?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity Level
+      description: Based on CVSS or your assessment
+      options:
+        - Low (minimal impact)
+        - Medium (some impact, limited scope)
+        - High (significant impact or data exposure)
+        - Critical (remote code execution, full system compromise)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Vulnerability Type
+      description: What kind of security issue is this?
+      options:
+        - SQL Injection
+        - Cross-Site Scripting (XSS)
+        - Cross-Site Request Forgery (CSRF)
+        - Authentication/Authorization bypass
+        - Information Disclosure
+        - Denial of Service (DoS)
+        - Dependency Vulnerability
+        - Configuration Issue
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected
+    attributes:
+      label: Affected Components
+      description: Which parts of the system are affected?
+      placeholder: |
+        - File/Module: 
+        - Endpoint/Route: 
+        - Version: 
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Potential Impact
+      description: What could an attacker do with this vulnerability?
+      placeholder: Describe the potential damage or data exposure
+
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Suggested Mitigation
+      description: If you know how to fix it, please share (optional)
+      placeholder: How could this be addressed?
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: Where did you discover this?
+      value: |
+        - Version: 
+        - Deployment: 
+        - Configuration: 
+
+  - type: checkboxes
+    id: disclosure
+    attributes:
+      label: Responsible Disclosure
+      options:
+        - label: I will not publicly disclose details until a fix is released
+          required: true
+        - label: I have not exploited this vulnerability maliciously
+          required: true
+        - label: I understand this will be handled with priority and confidentiality
+          required: true

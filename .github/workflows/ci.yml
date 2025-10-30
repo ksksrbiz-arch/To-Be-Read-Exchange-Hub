@@ -45,6 +45,21 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_DB: books_exchange_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout repository
@@ -67,7 +82,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Initialize test database
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: books_exchange_test
+          DB_USER: postgres
+          DB_PASSWORD: test_password
+          NODE_ENV: test
+        run: npm run db:init
+
       - name: Run unit tests
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: books_exchange_test
+          DB_USER: postgres
+          DB_PASSWORD: test_password
+          NODE_ENV: test
+          LOG_LEVEL: error
         run: npm test -- --coverage
 
       - name: Upload coverage reports
@@ -174,3 +207,59 @@ jobs:
         with:
           fail-on-severity: moderate
         continue-on-error: true
+
+  # Job 6: Smoke Tests
+  smoke:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: [quality, test]
+    
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_DB: books_exchange_smoke
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: smoke_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Initialize database
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: books_exchange_smoke
+          DB_USER: postgres
+          DB_PASSWORD: smoke_password
+          NODE_ENV: test
+        run: npm run db:init
+      
+      - name: Run smoke tests
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: books_exchange_smoke
+          DB_USER: postgres
+          DB_PASSWORD: smoke_password
+          NODE_ENV: test
+          PORT: 3000
+          LOG_LEVEL: error
+        run: npm run smoke

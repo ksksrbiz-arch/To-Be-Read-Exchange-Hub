@@ -69,9 +69,29 @@ Exposes Prometheus-compatible metrics for monitoring and alerting:
 - `active_database_connections` - Current DB connection pool size
 
 **SLO Metrics:**
-- `slo_availability_ratio` - Service availability percentage
-- `slo_latency_p99` - P99 latency tracking
-- `slo_error_budget_remaining` - Remaining error budget
+- `slo_availability_ratio` - Service availability percentage (30-day window)
+- `slo_latency_seconds` - Request latency histogram (endpoint × method labels)
+- `slo_error_budget_remaining` - Remaining error budget percentage
+
+**Latency Histogram Details:**
+The `slo_latency_seconds` histogram tracks request durations with:
+- **Labels**: `endpoint`, `method` (enables per-route analysis)
+- **Buckets**: 0.01s, 0.05s, 0.1s, 0.25s, 0.5s, 1s, 2s, 5s
+- **Metrics**: Automatically calculates count, sum, and percentiles (P50, P90, P95, P99)
+
+**Grafana Dashboard Setup:**
+```promql
+# P95 latency by endpoint
+histogram_quantile(0.95, rate(slo_latency_seconds_bucket[5m]))
+
+# P99 latency for specific route
+histogram_quantile(0.99, 
+  rate(slo_latency_seconds_bucket{endpoint="/api/books"}[5m])
+)
+
+# Request rate by endpoint
+sum(rate(slo_latency_seconds_count[5m])) by (endpoint, method)
+```
 
 **Example Prometheus Query:**
 ```promql

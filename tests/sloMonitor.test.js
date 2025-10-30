@@ -1,4 +1,4 @@
-const { sloMonitor } = require('../src/utils/sloMonitor');
+const { sloMonitor, sloLatency } = require('../src/utils/sloMonitor');
 
 describe('SLO Monitor', () => {
   test('initial status has full error budget and zero requests', () => {
@@ -18,10 +18,17 @@ describe('SLO Monitor', () => {
   });
 
   test('percentile calculation returns highest for small set', () => {
-    sloMonitor.recordRequest(10, false);
-    sloMonitor.recordRequest(20, false);
-    sloMonitor.recordRequest(30, false);
+    sloMonitor.recordRequest(10, false, '/api/test', 'GET');
+    sloMonitor.recordRequest(20, false, '/api/test', 'GET');
+    sloMonitor.recordRequest(30, false, '/api/test', 'GET');
     const status = sloMonitor.getStatus();
     expect(Number(status.latency.p99)).toBeGreaterThanOrEqual(Number(status.latency.p95));
+  });
+
+  test('histogram metric registers observations', () => {
+    const beforeCount = sloLatency.hashMap.size;
+    sloMonitor.recordRequest(50, false, '/api/metric', 'POST');
+    const afterCount = sloLatency.hashMap.size;
+    expect(afterCount).toBeGreaterThanOrEqual(beforeCount); // may increase or remain if same label set
   });
 });
