@@ -15,6 +15,29 @@
             <div id="authLinks" style="position: absolute; top: 20px; right: 20px;"></div>
         </header>
 
+        <section id="businessInfo" class="panel">
+            <h2>🏪 Store Information</h2>
+            <div id="businessInfoContent">Loading business information...</div>
+            <p id="googleBusinessLink" style="margin-top:8px;"></p>
+        </section>
+
+        <section id="affiliateSection" class="panel">
+            <h2>🤝 Affiliate Links</h2>
+            <ul id="affiliateLinks" class="link-list"></ul>
+        </section>
+
+        <section id="policySection" class="panel">
+            <h2>📜 Exchange & Credit Policy</h2>
+            <div id="policyContent">Loading policy...</div>
+            <p style="font-size:12px;color:#666;margin-top:6px;">Last updated content is cached in the database. <a href="/admin-site-content.html" id="editPolicyLink" style="display:none;">Edit Policy</a></p>
+        </section>
+
+        <section id="accountSection" class="panel">
+            <h2>👤 Your Account</h2>
+            <div id="accountStatus">Not signed in. <a href="/login.html">Sign in</a> or <a href="/register.html">Create an account</a>.</div>
+            <div id="linkStatus" style="margin-top:6px;font-size:14px;"></div>
+        </section>
+
         <div class="actions">
             <button id="addBookBtn" class="btn btn-primary">+ Add Book</button>
             <button id="syncPingoBtn" class="btn btn-secondary">🔄 Sync Pingo Inventory</button>
@@ -175,6 +198,8 @@
     </div>
 
     <div id="notification" class="notification"></div>
+
+    <script src="/js/site.js"></script>
 
     <script src="/js/app.js"></script>
 </body>
