@@ -1,9 +1,3 @@
-git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
-git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
-docker-compose up -d
-git clone https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub.git
-git clone https://github.com/ksksrbiz-arch/To-Be-Read-Exchange-Hub.git
-npm test                     # Run all tests with coverage
 # 📚 To-Be-Read Exchange Hub
 
 Enterprise-grade open source book exchange & inventory system with smart enrichment, resilient architecture, and production hardening you normally only see in paid platforms.
@@ -14,8 +8,9 @@ Enterprise-grade open source book exchange & inventory system with smart enrichm
 
 > Built for communities that need reliability without vendor lock‑in. Clinical startup discipline + hobby project heart.
 
-## 🔑 Core Value (Why it’s Different)
-Production practices (graceful shutdown, circuit breakers, metrics, SLO tracking, feature flags, API key auth, input sanitization) already wired in — no “rewrite for prod” tax later.
+## 🔑 Core Value (Why it's Different)
+
+Production practices (graceful shutdown, circuit breakers, metrics, SLO tracking, feature flags, API key auth, input sanitization) already wired in — no "rewrite for prod" tax later.
 
 ## 🚀 One-Line Installation (Fastest Way)
 
@@ -44,6 +39,7 @@ npm install && npm run go   # guided setup
 Full walkthrough: [QUICKSTART.md](QUICKSTART.md)
 
 ## 🧩 Feature Highlights
+
 - Smart inventory placement & bulk import (CSV/JSON)
 - Automatic enrichment (Open Library / Google Books)
 - Robust REST API + interactive Swagger docs
@@ -55,9 +51,11 @@ Full walkthrough: [QUICKSTART.md](QUICKSTART.md)
 Full enterprise rationale & patterns: `ENTERPRISE.md` • Architecture & internals: `IMPLEMENTATION.md`.
 
 ## 🛠 Prerequisites (Local Path)
+
 Node.js ≥ 18, PostgreSQL ≥ 12. (Dev container & Docker eliminate local installs.)
 
 ## ⚙️ First-Time Install (Manual Minimal)
+
 ```bash
 git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
 cd To-Be-Read-Exchange-Hub
@@ -66,10 +64,13 @@ npm install            # prefer: npm ci (CI environments)
 npm run db:init        # creates & seeds schema idempotently
 npm start              # health checked smart start
 ```
-Visit http://localhost:3000 and confirm `{"status":"ok"}` at /api/health.
+
+Visit <http://localhost:3000> and confirm `{"status":"ok"}` at /api/health.
 
 ## ⚡ Recommended Fast Path Improvements
+
 We aggressively trimmed first-run friction. Planned next tweaks:
+
 - Combine env creation + DB init under a single `bootstrap` script.
 - Use `npm ci` when lockfile present for faster deterministic installs.
 - Parallelize DB schema + dependency install where shell supports (`&` background).
@@ -77,6 +78,7 @@ We aggressively trimmed first-run friction. Planned next tweaks:
 - Cache build layers in Dockerfile (multi-stage already partially supported — see upcoming PR).
 
 ## 📜 Essential Scripts
+
 | Action | Command | Notes |
 | ------ | ------- | ----- |
 | Guided setup | `npm run go` | Interactive bootstrap (Docker vs local) |
@@ -89,26 +91,34 @@ We aggressively trimmed first-run friction. Planned next tweaks:
 | Stop | `npm run stop` | Graceful shutdown |
 
 ## 🧪 Quality Snapshot (Oct 2025)
+
 Coverage: Statements 88.6% • Branches 82.5% • Functions 91.7% • Lines 88.5%.
 Resilience & security layers covered by dedicated tests (graceful shutdown, circuit breaker transitions, header & sanitization, feature flag parsing).
 
 ## 🔍 API & Docs
+
 Swagger UI at `/api-docs` (live schemas + try-it). Prometheus metrics at `/metrics`. SLO status at `/api/slo`. Feature flags at `/api/features`.
 
 ## 🧱 Database Shape (High Level)
+
 `books`, `users`, `roles`, `permissions`, mapping tables, sync log. See `schema.sql` for details.
 
 ## 🤝 Contribute
+
 Read `CONTRIBUTING.md` then run:
+
 ```bash
 npm run verify
 ```
+
 Open issues for roadmap items (RBAC extension, sales flow, tracing exporters). We welcome focused improvements over broad rewrites.
 
 ## 📄 License
+
 ISC — permissive use. Attribution appreciated but not required.
 
 ## 🔗 Deep Dive References
+
 `ENTERPRISE.md` • `IMPLEMENTATION.md` • `QUICKSTART.md` • `SECURITY-STATUS.md` • `STABILITY-REPORT.md`
 
 ---
@@ -168,88 +178,103 @@ cd To-Be-Read-Exchange-Hub
 bash scripts/bootstrap.sh --interactive --seed-vintage   # guided + sample vintage data
 
 # (B) Minimal manual
-  git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
-  cd To-Be-Read-Exchange-Hub
-  npm run setup     # creates .env, optional DB init, runs tests
-  nano .env         # set DB_PASSWORD (change default!)
-
+git clone https://github.com/PNW-E/To-Be-Read-Exchange-Hub.git
+cd To-Be-Read-Exchange-Hub
+npm run setup     # creates .env, optional DB init, runs tests
+nano .env         # set DB_PASSWORD (change default!)
 
 # (C) Docker one-liner
-  docker compose up -d --build
-  ```
+docker compose up -d --build
+```
 
 Visit: `http://localhost:3000` (UI) • `/api-docs` (Swagger) • `/api/health` (health JSON)
 Vintage seed flag: `--seed-vintage` loads curated classic titles (see `scripts/lib/seed-vintage.sql`).
 
-  ## ✅ Prerequisites (Local Path Only)
-  Node.js ≥18 (tested on 20 LTS) • PostgreSQL ≥12 • npm (bundled). For container/Docker users, these are already handled.
+## ✅ Prerequisites (Local Path Only)
 
-  ## ⚙️ Essential Configuration
+Node.js ≥18 (tested on 20 LTS) • PostgreSQL ≥12 • npm (bundled). For container/Docker users, these are already handled.
 
-  Create `.env` (auto-generated by scripts) or copy from `.env.example`:
-  ```env
-  PORT=3000
-  NODE_ENV=development
-  LOG_LEVEL=info
-  DB_HOST=localhost
-  DB_NAME=books_exchange
-  DB_USER=postgres
-  DB_PASSWORD=CHANGE_ME
-  DB_PORT=5432
-  ```
-  Security tips: never commit `.env`; always replace default password; use `NODE_ENV=production` in prod.
+## ⚙️ Essential Configuration
 
-  ## 🧠 Smart Inventory + Enrichment (Quick View)
-  - Shelf auto = first letter of author last name; section increments per shelf.
-  - Manual override accepts `A-12`, `A`, or `Shelf A, Section 12`.
-  - ISBN triggers enrichment → merges title/author/publisher/description/cover from multiple sources with graceful fallback.
+Create `.env` (auto-generated by scripts) or copy from `.env.example`:
 
-  ## 🛠️ Common Scripts
-  ```bash
-  npm run go         # guided quickstart (Docker or local)
-  npm run setup      # bootstrap automation + optional DB init + tests
-  npm start          # start server (after setup) + then run smoke if desired
-  npm run smoke      # basic health + books endpoint smoke probe
-  npm run dev        # nodemon hot reload
-  npm test           # jest coverage
-  npm run db:init    # (re)initialize schema
-  npm run verify     # lint + format:check + tests
-  ```
+```env
+PORT=3000
+NODE_ENV=development
+LOG_LEVEL=info
+DB_HOST=localhost
+DB_NAME=books_exchange
+DB_USER=postgres
+DB_PASSWORD=CHANGE_ME
+DB_PORT=5432
+```
 
-  ## 🔍 API & Docs
-  Interactive Swagger: `/api-docs`. Core endpoints: `/api/books`, `/api/books/bulk`, `/api/sync/pingo`, `/api/health`, `/metrics`. For full request/response examples consult Swagger or `tests/*.test.js`.
+Security tips: never commit `.env`; always replace default password; use `NODE_ENV=production` in prod.
 
-  ## 🏗️ Structure (Condensed)
-  ```
-  src/
-    server.js          # entry
-    controllers/       # book, bulk, sync logic
-    services/          # enrichment, inventory algorithms
-    middleware/        # auth, validation, circuit breaker, observability
-    routes/            # REST endpoint wiring
-    utils/             # logger, feature flags, shutdown, SLO monitor
-  scripts/             # setup + quickstart + deploy helpers
-  public/              # static UI
-  tests/               # 70+ unit/integration suites
-  ```
+## 🧠 Smart Inventory + Enrichment (Quick View)
 
-  ## 🧪 Quality Snapshot
-  Statements ~88% • Functions >91% • Resilience, security & shutdown flows covered. See `TEST-RESULTS.md` & coverage/ for details.
+- Shelf auto = first letter of author last name; section increments per shelf.
+- Manual override accepts `A-12`, `A`, or `Shelf A, Section 12`.
+- ISBN triggers enrichment → merges title/author/publisher/description/cover from multiple sources with graceful fallback.
 
-  ## 🔐 Production Fast Checklist
-  1. Set strong `DB_PASSWORD`, change rate limits if needed.
-  2. Run `npm run build` then `NODE_ENV=production npm start` or use Docker.
-  3. Point monitoring at `/metrics` and `/api/health`.
-  4. Enable API key auth (see `ENTERPRISE.md`).
-  5. Configure backups for PostgreSQL.
+## 🛠️ Common Scripts
 
-  ## 🤝 Contributing
-  Fork → branch → changes + tests → `npm run verify` → PR. High‑signal improvements welcome (tests/docs/perf/security). See `CONTRIBUTING.md`.
+```bash
+npm run go         # guided quickstart (Docker or local)
+npm run setup      # bootstrap automation + optional DB init + tests
+npm start          # start server (after setup) + then run smoke if desired
+npm run smoke      # basic health + books endpoint smoke probe
+npm run dev        # nodemon hot reload
+npm test           # jest coverage
+npm run db:init    # (re)initialize schema
+npm run verify     # lint + format:check + tests
+```
 
-  ## 📄 License
-  ISC License (see `LICENSE`).
+## 🔍 API & Documentation
 
-  Made with ❤️ for book communities. If this helps you, share a book forward.
+Interactive Swagger: `/api-docs`. Core endpoints: `/api/books`, `/api/books/bulk`, `/api/sync/pingo`, `/api/health`, `/metrics`. For full request/response examples consult Swagger or `tests/*.test.js`.
+
+## 🏗️ Structure (Condensed)
+
+```text
+src/
+  server.js          # entry
+  controllers/       # book, bulk, sync logic
+  services/          # enrichment, inventory algorithms
+  middleware/        # auth, validation, circuit breaker, observability
+routes/            # REST endpoint wiring
+utils/             # logger, feature flags, shutdown, SLO monitor
+scripts/             # setup + quickstart + deploy helpers
+public/              # static UI
+tests/               # 70+ unit/integration suites
+```
+
+## 🧪 Quality Snapshot
+
+Statements ~88% • Functions >91% • Resilience, security & shutdown flows covered. See `TEST-RESULTS.md` & coverage/ for details.
+
+## 🔐 Production Fast Checklist
+
+1. Set strong `DB_PASSWORD`, change rate limits if needed.
+2. Run `npm run build` then `NODE_ENV=production npm start` or use Docker.
+3. Point monitoring at `/metrics` and `/api/health`.
+4. Enable API key auth (see `ENTERPRISE.md`).
+5. Configure backups for PostgreSQL.
+
+## 🤝 Contributing
+
+Fork → branch → changes + tests → `npm run verify` → PR. High‑signal improvements welcome (tests/docs/perf/security). See `CONTRIBUTING.md`.
+
+## 📄 License (ISC)
+
+ISC License (see `LICENSE`).
+
+Made with ❤️ for book communities. If this helps you, share a book forward.
+
+---
+
+### Bulk Operations Examples
+
 **Example:**
 
 ```bash
@@ -263,9 +288,7 @@ curl -X PUT http://localhost:3000/api/books/bulk \
   }'
 ```
 
----
-
-#### Bulk Delete Books
+### Bulk Delete Books
 
 **DELETE** `/api/books/bulk`
 
