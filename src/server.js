@@ -11,6 +11,7 @@ const bookRoutes = require('./routes/books');
 const bulkRoutes = require('./routes/bulk');
 const syncRoutes = require('./routes/sync');
 const healthDbRoute = require('./routes/healthDb');
+const siteRoutes = require('./routes/site');
 const swaggerSpec = require('./config/swagger');
 
 // Enterprise middleware
@@ -80,10 +81,23 @@ app.use(
 );
 
 // API Routes with rate limiting
+app.use('/api/batch', apiLimiter, apiKeyAuth, require('./routes/batch')); // Enhanced batch upload
 app.use('/api/books/bulk', apiLimiter, apiKeyAuth, bulkRoutes);
 app.use('/api/books', apiLimiter, apiKeyAuth, bookRoutes);
 app.use('/api/sync', syncLimiter, apiKeyAuth, syncRoutes);
 app.use('/api/health/db', healthDbRoute);
+app.use('/api/site', siteRoutes);
+
+// Enforce HTTPS in production (behind proxy) with local bypass
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] !== 'https') {
+      const host = req.headers.host;
+      return res.redirect(301, `https://${host}${req.originalUrl}`);
+    }
+  }
+  next();
+});
 
 // Auth routes (public for register/login)
 app.use('/api/auth', require('./routes/auth'));
