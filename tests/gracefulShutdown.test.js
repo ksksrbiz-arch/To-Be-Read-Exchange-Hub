@@ -53,4 +53,13 @@ describe('GracefulShutdown', () => {
     expect(c1.destroy).toHaveBeenCalled();
     expect(c2.destroy).toHaveBeenCalled();
   });
+
+  test('isShuttingDown reflects flag changes', () => {
+    const fakeServer = { on: () => {}, close: (cb) => cb && cb() };
+    const fakePool = { end: jest.fn().mockResolvedValue() };
+    const gs = new GracefulShutdown(fakeServer, fakePool);
+    expect(gs.isShuttingDown()).toBe(false);
+    gs.shuttingDown = true;
+    expect(gs.isShuttingDown()).toBe(true);
+  });
 });

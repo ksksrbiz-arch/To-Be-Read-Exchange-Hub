@@ -68,4 +68,13 @@ describe('security middleware', () => {
     expect(req.params.c).toBe('x');
     expect(next).toHaveBeenCalled();
   });
+
+  test('sanitizeInput handles nested objects & arrays', () => {
+    const req = { body: { list: ['A\x00', 'B\x1F', { deep: 'C\x7F' }], obj: { k: 'V\x00X' } } };
+    sanitizeInput(req, {}, () => {});
+    expect(req.body.list[0]).toBe('A');
+    expect(req.body.list[1]).toBe('B');
+    expect(req.body.list[2].deep).toBe('C');
+    expect(req.body.obj.k).toBe('VX');
+  });
 });

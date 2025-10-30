@@ -30,4 +30,17 @@ describe('FeatureFlags: percentage rollout', () => {
     expect(enabledCount).toBeGreaterThan(20);
     expect(enabledCount).toBeLessThan(80);
   });
+  
+  test('parseValue handles primitives and invalid gracefully', () => {
+    featureFlags.setFlag('pv_true', featureFlags.parseValue('true'));
+    featureFlags.setFlag('pv_false', featureFlags.parseValue('false'));
+    featureFlags.setFlag('pv_pct', featureFlags.parseValue('30'));
+    featureFlags.setFlag('pv_bad', featureFlags.parseValue('not-a-number'));
+    expect(featureFlags.isEnabled('pv_true')).toBe(true);
+    expect(featureFlags.isEnabled('pv_false')).toBe(false);
+    // Percentage requires identifier
+    expect(featureFlags.isEnabled('pv_pct')).toBe(false);
+    expect(typeof featureFlags.getAllFlags().pv_pct).toBe('number');
+    expect(featureFlags.getAllFlags().pv_bad).toBe(false);
+  });
 });
