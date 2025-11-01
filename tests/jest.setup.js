@@ -21,11 +21,8 @@ jest.mock('uuid', () => ({
   v4: () => 'test-uuid-' + Math.random().toString(16).slice(2),
 }));
 
-// Mock pg Pool to avoid real DB dependency in health db test
-jest.mock('../src/config/database', () => ({
-  query: jest.fn().mockResolvedValue({ rows: [{ '?column?': 1 }] }),
-  end: jest.fn().mockResolvedValue(),
-}));
+// NOTE: Database is NOT mocked globally - individual tests should mock as needed
+// Example: jest.mock('../src/config/database', () => ({ query: jest.fn() }))
 
 
 // Removed mock for gracefulShutdown to allow real implementation tests to run in CI.

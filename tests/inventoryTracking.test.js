@@ -11,19 +11,19 @@ describe('Inventory Tracking Service', () => {
   beforeAll(async () => {
     // Setup test shelves
     await pool.query(`
-      INSERT INTO shelf_capacity (shelf, section, max_capacity, current_count, genre_preference, location_notes)
+      INSERT INTO shelf_capacity (shelf_location, section, max_capacity, current_count, genre_preference, notes)
       VALUES 
         ('A', '01', 100, 50, 'Fiction', 'Main floor'),
         ('A', '02', 100, 90, 'Fiction', 'Main floor'),
         ('B', '01', 150, 30, 'Non-Fiction', 'Second floor'),
         ('C', '01', 200, 0, 'Science Fiction', 'Third floor')
-      ON CONFLICT (shelf, section) DO UPDATE 
+      ON CONFLICT (shelf_location, section) DO UPDATE 
       SET current_count = EXCLUDED.current_count
     `);
   });
 
   afterAll(async () => {
-    await pool.query('DELETE FROM shelf_capacity WHERE shelf IN (\'A\', \'B\', \'C\', \'OVERFLOW\')');
+    await pool.query('DELETE FROM shelf_capacity WHERE shelf_location IN (\'A\', \'B\', \'C\', \'OVERFLOW\')');
     await pool.query('DELETE FROM incoming_books WHERE isbn LIKE \'TEST-%\'');
     await pool.end();
   });
@@ -82,7 +82,7 @@ describe('Inventory Tracking Service', () => {
 
       // Cleanup
       await pool.query(
-        'UPDATE shelf_capacity SET current_count = 50 WHERE shelf = $1 AND section = $2',
+        'UPDATE shelf_capacity SET current_count = 50 WHERE shelf_location = $1 AND section = $2',
         ['A', '01']
       );
     });
@@ -132,7 +132,7 @@ describe('Inventory Tracking Service', () => {
 
     it('should calculate utilization percentage correctly', async () => {
       await pool.query(
-        'UPDATE shelf_capacity SET current_count = 75 WHERE shelf = $1 AND section = $2',
+        'UPDATE shelf_capacity SET current_count = 75 WHERE shelf_location = $1 AND section = $2',
         ['A', '01']
       );
 
@@ -165,7 +165,7 @@ describe('Inventory Tracking Service', () => {
 
     it('should not allow negative count', async () => {
       await pool.query(
-        'UPDATE shelf_capacity SET current_count = 5 WHERE shelf = $1 AND section = $2',
+        'UPDATE shelf_capacity SET current_count = 5 WHERE shelf_location = $1 AND section = $2',
         ['C', '01']
       );
 
