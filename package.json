@@ -39,7 +39,7 @@
     "@opentelemetry/auto-instrumentations-node": "^0.66.0",
     "@opentelemetry/exporter-prometheus": "^0.207.0",
     "@opentelemetry/sdk-node": "^0.207.0",
-    "axios": "^1.12.2",
+    "axios": "^1.13.1",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "compression": "^1.8.1",
