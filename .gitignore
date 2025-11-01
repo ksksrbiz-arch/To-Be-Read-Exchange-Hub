@@ -21,3 +21,8 @@ tmp/
 /.cache/
 /.eslintcache
 
+# Test artifacts
+uploads/*.jpg
+uploads/*.csv
+uploads/*.json
+

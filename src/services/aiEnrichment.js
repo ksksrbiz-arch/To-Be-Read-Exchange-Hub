@@ -67,7 +67,8 @@ async function enrichWithAI(bookData) {
     }
   }
 
-  throw lastError || new Error('All AI providers failed');
+  logger.warn('All AI providers failed', { lastError: lastError?.message });
+  return null;
 }
 
 /**

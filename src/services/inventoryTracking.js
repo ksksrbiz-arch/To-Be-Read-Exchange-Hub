@@ -21,15 +21,18 @@ async function getShelfCapacity(shelf, section = null) {
     const result = await pool.query(query, params);
 
     if (result.rows.length === 0) {
-      // Create default capacity entry
-      return await createShelfCapacity(shelf, section);
+      return null;
     }
 
     const capacity = result.rows[0];
+    const availableSpace = capacity.max_capacity - capacity.current_count;
+    const utilization = (capacity.current_count / capacity.max_capacity) * 100;
+    
     return {
       ...capacity,
-      available_space: capacity.max_capacity - capacity.current_count,
-      utilization: (capacity.current_count / capacity.max_capacity) * 100,
+      available_space: availableSpace,
+      available: availableSpace,  // Alias for compatibility
+      utilization: utilization,
     };
   } catch (error) {
     logger.error(`Error getting shelf capacity: ${error.message}`);
@@ -44,12 +47,13 @@ async function createShelfCapacity(shelf, section = null, maxCapacity = 100) {
   const result = await pool.query(
     `INSERT INTO shelf_capacity (shelf_location, section, max_capacity, current_count)
      VALUES ($1, $2, $3, 0)
-     ON CONFLICT (shelf_location, section) DO NOTHING
+     ON CONFLICT (shelf_location, section) DO UPDATE
+     SET max_capacity = EXCLUDED.max_capacity
      RETURNING *`,
     [shelf, section, maxCapacity]
   );
 
-  return result.rows[0] || await getShelfCapacity(shelf, section);
+  return result.rows[0];
 }
 
 /**
@@ -57,11 +61,11 @@ async function createShelfCapacity(shelf, section = null, maxCapacity = 100) {
  */
 async function updateShelfCount(shelf, section, delta) {
   await pool.query(
-    `INSERT INTO shelf_capacity (shelf_location, section, current_count)
-     VALUES ($1, $2, $3)
+    `INSERT INTO shelf_capacity (shelf_location, section, current_count, max_capacity)
+     VALUES ($1, $2, GREATEST(0, $3), 100)
      ON CONFLICT (shelf_location, section)
      DO UPDATE SET 
-       current_count = shelf_capacity.current_count + $3,
+       current_count = GREATEST(0, shelf_capacity.current_count + $3),
        updated_at = CURRENT_TIMESTAMP`,
     [shelf, section, delta]
   );
@@ -84,12 +88,19 @@ async function findOptimalShelf(bookData, options = {}) {
   // 4. First available space
 
   if (preferredShelf) {
-    const capacity = await getShelfCapacity(preferredShelf);
-    if (capacity.available_space > 0) {
+    // Parse preferred shelf if it contains section (e.g., 'B-01')
+    const [shelfPart, sectionPart] = preferredShelf.includes('-') 
+      ? preferredShelf.split('-') 
+      : [preferredShelf, null];
+    
+    const capacity = await getShelfCapacity(shelfPart, sectionPart);
+    if (capacity && capacity.available_space > 0) {
       return {
-        shelf_location: preferredShelf,
-        section: await getNextSection(preferredShelf),
+        shelf_location: shelfPart,
+        shelf: shelfPart,
+        section: sectionPart || await getNextSection(shelfPart),
         placement_reason: 'manual_preference',
+        utilization: capacity.utilization,
       };
     }
   }
@@ -98,12 +109,14 @@ async function findOptimalShelf(bookData, options = {}) {
   if (genre) {
     const genreShelf = await findGenreShelf(genre);
     if (genreShelf) {
-      const capacity = await getShelfCapacity(genreShelf.shelf_location);
-      if (capacity.available_space > 0) {
+      const capacity = await getShelfCapacity(genreShelf.shelf_location, genreShelf.section);
+      if (capacity && capacity.available_space > 0) {
         return {
           shelf_location: genreShelf.shelf_location,
-          section: await getNextSection(genreShelf.shelf_location),
+          shelf: genreShelf.shelf_location,
+          section: genreShelf.section,
           placement_reason: 'genre_match',
+          utilization: capacity.utilization,
         };
       }
     }
@@ -115,15 +128,19 @@ async function findOptimalShelf(bookData, options = {}) {
   
   const capacity = await getShelfCapacity(shelf);
   
-  if (avoidFull && capacity.available_space === 0) {
+  if (avoidFull && capacity && capacity.available_space === 0) {
     // Find nearest shelf with space
     return await findNearestAvailableShelf(shelf);
   }
 
+  const section = await getNextSection(shelf);
+  
   return {
     shelf_location: shelf,
-    section: await getNextSection(shelf),
+    shelf: shelf,
+    section: section,
     placement_reason: 'author_alpha',
+    utilization: capacity ? capacity.utilization : 0,
   };
 }
 
@@ -132,9 +149,11 @@ async function findOptimalShelf(bookData, options = {}) {
  */
 async function findGenreShelf(genre) {
   const result = await pool.query(
-    `SELECT * FROM shelf_capacity 
+    `SELECT shelf_location, section, max_capacity, current_count, genre_preference
+     FROM shelf_capacity 
      WHERE genre_preference = $1 
-     ORDER BY current_count ASC 
+       AND current_count < max_capacity
+     ORDER BY current_count ASC, shelf_location ASC, section ASC
      LIMIT 1`,
     [genre]
   );
@@ -152,7 +171,9 @@ async function getNextSection(shelf) {
     [shelf]
   );
 
-  return String(result.rows[0]?.next_section || '1');
+  const nextNum = result.rows[0]?.next_section || 1;
+  // Pad to 2 digits
+  return String(nextNum).padStart(2, '0');
 }
 
 /**
@@ -169,21 +190,27 @@ async function findNearestAvailableShelf(targetShelf) {
   );
 
   if (result.rows.length > 0) {
+    const shelfLoc = result.rows[0].shelf_location;
+    const section = await getNextSection(shelfLoc);
+    const capacity = await getShelfCapacity(shelfLoc);
     return {
-      shelf_location: result.rows[0].shelf_location,
-      section: await getNextSection(result.rows[0].shelf_location),
+      shelf_location: shelfLoc,
+      shelf: shelfLoc,
+      section: section,
       placement_reason: 'overflow_nearest',
+      utilization: capacity ? capacity.utilization : 0,
     };
   }
 
   // Fallback: create new overflow shelf
-  const overflowShelf = `${targetShelf}-OVERFLOW`;
-  await createShelfCapacity(overflowShelf, '1', 200);
+  await createShelfCapacity('OVERFLOW', '01', 200);
   
   return {
-    shelf_location: overflowShelf,
-    section: '1',
+    shelf_location: 'OVERFLOW',
+    shelf: 'OVERFLOW',
+    section: '01',
     placement_reason: 'overflow_new',
+    utilization: 0,
   };
 }
 
@@ -191,40 +218,19 @@ async function findNearestAvailableShelf(targetShelf) {
  * Get inventory status report
  */
 async function getInventoryStatus() {
-  const totalResult = await pool.query(
+  const result = await pool.query(
     `SELECT 
-      COUNT(*) as total_books,
-      SUM(quantity) as total_copies,
-      SUM(available_quantity) as available_copies
-     FROM books`
-  );
-
-  const shelfResult = await pool.query(
-    `SELECT 
-      shelf_location,
-      SUM(current_count) as book_count,
-      SUM(max_capacity) as total_capacity,
-      AVG((current_count::FLOAT / NULLIF(max_capacity, 0)) * 100) as avg_utilization
+      shelf_location as shelf,
+      section,
+      max_capacity,
+      current_count,
+      (current_count::FLOAT / NULLIF(max_capacity, 0) * 100) as utilization,
+      (max_capacity - current_count) as available_space
      FROM shelf_capacity
-     GROUP BY shelf_location
-     ORDER BY shelf_location`
+     ORDER BY shelf_location, section`
   );
 
-  const overCapacity = await pool.query(
-    `SELECT shelf_location, section, current_count, max_capacity
-     FROM shelf_capacity
-     WHERE current_count > max_capacity`
-  );
-
-  return {
-    totals: totalResult.rows[0],
-    shelves: shelfResult.rows,
-    over_capacity: overCapacity.rows,
-    alerts: {
-      over_capacity_count: overCapacity.rows.length,
-      needs_attention: overCapacity.rows.length > 0,
-    },
-  };
+  return result.rows;
 }
 
 /**
@@ -249,7 +255,7 @@ async function getIncomingQueue(filters = {}) {
 
   if (filters.batch_id) {
     params.push(filters.batch_id);
-    query += ' AND ib.batch_id = $${params.length}';
+    query += ` AND ib.batch_id = $${params.length}`;
   }
 
   query += ' ORDER BY ib.created_at ASC';
