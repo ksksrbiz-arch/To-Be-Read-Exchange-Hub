@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - To-Be-Read Exchange Hub</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .user-info h1 {
+            margin: 0;
+            color: #333;
+        }
+        .user-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .btn-logout {
+            padding: 10px 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-logout:hover {
+            background: #da190b;
+        }
+        .dashboard-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .dashboard-section h2 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .permission-item {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .quick-link {
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s;
+        }
+        .quick-link:hover {
+            background: #4CAF50;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div id="loadingMessage" class="loading">Loading...</div>
+        <div id="dashboardContent" style="display: none;">
+            <div class="dashboard-header">
+                <div class="user-info">
+                    <h1>Welcome, <span id="userName"></span>!</h1>
+                    <p>Email: <span id="userEmail"></span></p>
+                </div>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Your Roles</h2>
+                <div id="rolesContainer"></div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Your Permissions</h2>
+                <div id="permissionsContainer"></div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Quick Links</h2>
+                <div class="quick-links">
+                    <a href="/index.html" class="quick-link">
+                        📚 Inventory
+                    </a>
+                    <a href="/api-docs" class="quick-link">
+                        📖 API Docs
+                    </a>
+                    <a href="#" onclick="viewProfile(); return false;" class="quick-link">
+                        👤 My Profile
+                    </a>
+                    <a href="/metrics" class="quick-link" id="metricsLink" style="display: none;">
+                        📊 Metrics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        async function loadUserData() {
+            const user = getStoredUser();
+            if (!user) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                // Fetch full user details with roles/permissions
+                const response = await authenticatedFetch(`/api/users/${user.id}`);
+                const data = await response.json();
+
+                if (data.success && data.user) {
+                    const fullUser = data.user;
+                    
+                    // Update stored user
+                    localStorage.setItem('user', JSON.stringify(fullUser));
+                    
+                    // Populate UI
+                    document.getElementById('userName').textContent = fullUser.display_name || fullUser.email;
+                    document.getElementById('userEmail').textContent = fullUser.email;
+                    
+                    // Display roles
+                    const rolesContainer = document.getElementById('rolesContainer');
+                    if (fullUser.roles && fullUser.roles.length > 0) {
+                        rolesContainer.innerHTML = fullUser.roles.map(role => 
+                            `<span class="role-badge">${role.name}</span>`
+                        ).join('');
+                    } else {
+                        rolesContainer.innerHTML = '<p>No roles assigned</p>';
+                    }
+                    
+                    // Display permissions
+                    const permissionsContainer = document.getElementById('permissionsContainer');
+                    if (fullUser.permissions && fullUser.permissions.length > 0) {
+                        permissionsContainer.innerHTML = fullUser.permissions.map(perm => 
+                            `<span class="permission-item">${perm}</span>`
+                        ).join('');
+                        
+                        // Show metrics link if user has INVENTORY_READ permission
+                        if (fullUser.permissions.includes('INVENTORY_READ')) {
+                            document.getElementById('metricsLink').style.display = 'block';
+                        }
+                    } else {
+                        permissionsContainer.innerHTML = '<p>No permissions assigned</p>';
+                    }
+                    
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('dashboardContent').style.display = 'block';
+                } else {
+                    alert('Failed to load user data');
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                alert('Session expired. Please login again.');
+                logout();
+            }
+        }
+
+        function viewProfile() {
+            const user = getStoredUser();
+            alert(`User Profile\n\nID: ${user.id}\nEmail: ${user.email}\nDisplay Name: ${user.display_name || 'Not set'}`);
+        }
+
+        // Load data on page load
+        loadUserData();
+    </script>
+</body>
+</html>

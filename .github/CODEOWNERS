@@ -1,0 +1,40 @@
+# Code Owners
+# These owners will be requested for review when someone opens a pull request.
+# Order matters: the last matching pattern takes precedence.
+
+# Default owners for everything in the repo
+* @PNW-E
+
+# Core application code
+/src/**                     @PNW-E
+/tests/**                   @PNW-E
+
+# Configuration files
+*.json                      @PNW-E
+*.yml                       @PNW-E
+*.yaml                      @PNW-E
+.env.example                @PNW-E
+
+# Database & migrations
+/src/config/database.js     @PNW-E
+/src/config/schema.sql      @PNW-E
+/scripts/init-db.sh         @PNW-E
+
+# Security-critical files
+/src/middleware/security.js @PNW-E
+/src/middleware/auth.js     @PNW-E
+SECURITY.md                 @PNW-E
+.github/workflows/security.yml @PNW-E
+
+# Infrastructure & deployment
+/scripts/deploy-*.sh        @PNW-E
+Dockerfile                  @PNW-E
+docker-compose.yml          @PNW-E
+.github/workflows/**        @PNW-E
+
+# Documentation
+*.md                        @PNW-E
+/docs/**                    @PNW-E
+
+# Scripts & tooling
+/scripts/**                 @PNW-E

@@ -3,45 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Be-Read Exchange Hub</title>
+    <title>To-Be-Read Exchange Hub - Smart Book Inventory</title>
+    <meta name="description" content="Professional book inventory management system with AI-powered enrichment and intelligent shelf organization">
     <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/auth.js"></script>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>📚 To-Be-Read Exchange Hub</h1>
-            <p>Smart Inventory Management System</p>
+        <!-- Header Section with Navigation -->
+        <header cla extract and run processss="main-header">
+            <div class="header-content">
+                <div class="branding">
+                    <h1 class="site-title">📚 To-Be-Read Exchange Hub</h1>
+                    <p class="site-tagline">Smart Inventory Management System</p>
+                </div>
+                <nav class="header-nav" id="authLinks"></nav>
+            </div>
         </header>
 
-        <div class="actions">
-            <button id="addBookBtn" class="btn btn-primary">+ Add Book</button>
-            <button id="syncPingoBtn" class="btn btn-secondary">🔄 Sync Pingo Inventory</button>
-            <button id="exportBtn" class="btn btn-success">📥 Export Data</button>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h2 class="hero-title">Manage Your Book Inventory with Intelligence</h2>
+                <p class="hero-description">AI-powered metadata enrichment • Intelligent shelf allocation • Batch uploads • Real-time sync</p>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="quick-actions">
+            <button id="addBookBtn" class="action-card primary">
+                <span class="action-icon">📖</span>
+                <span class="action-label">Add Single Book</span>
+                <span class="action-desc">Quick entry with AI enrichment</span>
+            </button>
+            <a href="/batch-upload.html" class="action-card secondary">
+                <span class="action-icon">📚</span>
+                <span class="action-label">Batch Upload</span>
+                <span class="action-desc">CSV/JSON with images</span>
+            </a>
+            <button id="syncPingoBtn" class="action-card accent">
+                <span class="action-icon">🔄</span>
+                <span class="action-label">Sync Inventory</span>
+                <span class="action-desc">Pingo integration</span>
+            </button>
+            <button id="exportBtn" class="action-card success">
+                <span class="action-icon">📥</span>
+                <span class="action-label">Export Data</span>
+                <span class="action-desc">CSV or JSON format</span>
+            </button>
+        </section>
+
+        <!-- Info Panels Grid -->
+        <div class="info-panels">
+            <section id="businessInfo" class="info-panel">
+                <div class="panel-header">
+                    <h3>🏪 Store Information</h3>
+                </div>
+                <div class="panel-content">
+                    <div id="businessInfoContent" class="loading-state">Loading...</div>
+                    <div id="googleBusinessLink"></div>
+                </div>
+            </section>
+
+            <section id="accountSection" class="info-panel">
+                <div class="panel-header">
+                    <h3>👤 Your Account</h3>
+                </div>
+                <div class="panel-content">
+                    <div id="accountStatus" class="account-info">
+                        <div id="accountPanel"></div>
+                    </div>
+                    <div id="linkStatus" class="link-status"></div>
+                </div>
+            </section>
+
+            <section id="affiliateSection" class="info-panel">
+                <div class="panel-header">
+                    <h3>🤝 Affiliate Partners</h3>
+                </div>
+                <div class="panel-content">
+                    <ul id="affiliateLinksList" class="affiliate-list"></ul>
+                </div>
+            </section>
+
+            <section id="policySection" class="info-panel full-width">
+                <div class="panel-header">
+                    <h3>📜 Exchange & Credit Policy</h3>
+                    <a href="/admin-site-content.html" id="editPolicyLink" class="edit-link" style="display:none;">
+                        ✏️ Edit
+                    </a>
+                </div>
+                <div class="panel-content">
+                    <div id="policyContent" class="policy-content loading-state">Loading policy...</div>
+                </div>
+            </section>
         </div>
 
-        <div class="books-container">
-            <div class="inventory-header">
-                <h2>Book Inventory (<span id="bookCount">0</span>)</h2>
+        <!-- Inventory Section -->
+        <section class="inventory-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    📖 Book Inventory 
+                    <span class="book-count-badge" id="bookCount">0</span>
+                </h2>
                 <div class="inventory-controls">
-                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search by title, author, or ISBN...">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search titles, authors, ISBN...">
                     <select id="filterShelf" class="filter-select">
-                        <option value="">All Shelves</option>
+                        <option value="">📚 All Shelves</option>
                     </select>
                     <select id="sortSelect" class="sort-select">
-                        <option value="title-asc">Title (A-Z)</option>
-                        <option value="title-desc">Title (Z-A)</option>
-                        <option value="author-asc">Author (A-Z)</option>
-                        <option value="author-desc">Author (Z-A)</option>
-                        <option value="location-asc">Location (A-Z)</option>
-                        <option value="quantity-desc">Quantity (High-Low)</option>
-                        <option value="quantity-asc">Quantity (Low-High)</option>
+                        <option value="title-asc">Title (A→Z)</option>
+                        <option value="title-desc">Title (Z→A)</option>
+                        <option value="author-asc">Author (A→Z)</option>
+                        <option value="author-desc">Author (Z→A)</option>
+                        <option value="location-asc">Location (A→Z)</option>
+                        <option value="quantity-desc">Stock (High→Low)</option>
+                        <option value="quantity-asc">Stock (Low→High)</option>
                         <option value="date-desc">Newest First</option>
                         <option value="date-asc">Oldest First</option>
                     </select>
                 </div>
             </div>
+            
             <div id="booksGrid" class="books-grid"></div>
-        </div>
+        </section>
     </div>
 
     <!-- Add Book Modal -->
@@ -173,6 +258,8 @@
     </div>
 
     <div id="notification" class="notification"></div>
+
+    <script src="/js/site.js"></script>
 
     <script src="/js/app.js"></script>
 </body>

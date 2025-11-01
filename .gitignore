@@ -3,7 +3,21 @@ node_modules/
 *.log
 .DS_Store
 coverage/
-.vscode/
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
 .idea/
 dist/
 build/
+.jest-cache/
+# Local development runtime & caches (prevent large binary commits)
+.local/
+.npm-cache/
+*.pid
+*.pid.lock
+logs/
+*.tgz
+tmp/
+/.cache/
+/.eslintcache
+

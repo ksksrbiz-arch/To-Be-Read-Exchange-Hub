@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/PNW-E/To-Be-Read-Exchange-Hub/blob/main/README.md
+    about: Check the documentation before opening an issue
+  - name: 💬 Discussions
+    url: https://github.com/PNW-E/To-Be-Read-Exchange-Hub/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 🔒 Private Security Report
+    url: mailto:security@example.com
+    about: Report critical security vulnerabilities privately

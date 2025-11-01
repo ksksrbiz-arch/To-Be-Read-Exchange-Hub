@@ -4,17 +4,29 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const swaggerUi = require('swagger-ui-express');
+const compression = require('compression');
 require('dotenv').config();
 
 const bookRoutes = require('./routes/books');
+const bulkRoutes = require('./routes/bulk');
 const syncRoutes = require('./routes/sync');
 const healthDbRoute = require('./routes/healthDb');
+const siteRoutes = require('./routes/site');
 const swaggerSpec = require('./config/swagger');
+
+// Enterprise middleware
+const { securityHeaders, sanitizeInput, apiKeyAuth } = require('./middleware/security');
+const { correlationId, metricsMiddleware, metricsEndpoint } = require('./middleware/observability');
+const featureFlags = require('./utils/featureFlags');
+const { sloMonitor } = require('./utils/sloMonitor');
+const pool = require('./config/database');
 
 const app = express();
 
 // Always trust proxy for correct client IP detection behind reverse proxy (Docker, etc)
 app.set('trust proxy', 1);
+// Remove Express identification header for security hardening
+app.disable('x-powered-by');
 const PORT = process.env.PORT || 3000;
 
 // Rate limiting middleware (configurable via env)
@@ -40,9 +52,15 @@ const syncLimiter = rateLimit({
 });
 
 // Middleware
+app.use(compression()); // Gzip compression
+app.use(securityHeaders); // Enterprise security headers
+app.use(correlationId); // Request correlation IDs
+app.use(metricsMiddleware); // Prometheus metrics
+app.use(featureFlags.middleware()); // Feature flags
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(sanitizeInput); // Input sanitization
 
 // Disable caching for all responses in development
 app.use((req, res, next) => {
@@ -63,9 +81,56 @@ app.use(
 );
 
 // API Routes with rate limiting
-app.use('/api/books', apiLimiter, bookRoutes);
-app.use('/api/sync', syncLimiter, syncRoutes);
+app.use('/api/batch', apiLimiter, apiKeyAuth, require('./routes/batch')); // Enhanced batch upload
+app.use('/api/books/bulk', apiLimiter, apiKeyAuth, bulkRoutes);
+app.use('/api/books', apiLimiter, apiKeyAuth, bookRoutes);
+app.use('/api/sync', syncLimiter, apiKeyAuth, syncRoutes);
 app.use('/api/health/db', healthDbRoute);
+app.use('/api/site', siteRoutes);
+
+// Enforce HTTPS in production (behind proxy) with local bypass
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] !== 'https') {
+      const host = req.headers.host;
+      return res.redirect(301, `https://${host}${req.originalUrl}`);
+    }
+  }
+  next();
+});
+
+// Auth routes (public for register/login)
+app.use('/api/auth', require('./routes/auth'));
+
+// User management routes (authenticated)
+app.use('/api/users', require('./routes/users'));
+
+// Enterprise endpoints
+app.get('/metrics', metricsEndpoint); // Prometheus metrics
+app.get('/api/slo', (req, res) => {
+  // Service Level Objectives status (ensure summary always included)
+  const status = sloMonitor.getStatus();
+  if (!status.summary) {
+    status.summary = {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      windowSize: '30 days',
+    };
+  }
+  res.json(status);
+});
+app.get('/api/features', (req, res) => {
+  // Feature flags (for admin dashboard)
+  if (req.features) {
+    res.json({
+      success: true,
+      features: req.features.getAll(),
+    });
+  } else {
+    res.status(500).json({ success: false, error: 'Feature flags not initialized' });
+  }
+});
 
 // API Documentation
 app.use(
@@ -107,25 +172,69 @@ app.get('/', (req, res) => {
  *                 timestamp:
  *                   type: string
  *                   format: date-time
+ *                 uptime:
+ *                   type: number
+ *                   description: Server uptime in seconds
+ *                 version:
+ *                   type: string
+ *                   description: API version
  */
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: 'v1',
+    environment: process.env.NODE_ENV || 'development',
+  });
 });
 
 // Error handling middleware
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   const logger = require('./utils/logger');
-  logger.error('Unhandled error: %s', err.stack || err);
-  res.status(500).json({ error: 'Something went wrong!', message: err.message });
+  
+  // Log with correlation ID
+  if (req.log) {
+    req.log.error({ err, path: req.path, method: req.method }, 'Unhandled error');
+  } else {
+    logger.error('Unhandled error: %s', err.stack || err);
+  }
+  
+  // Track SLO
+  sloMonitor.recordRequest(0, true);
+  
+  // Don't leak internal errors in production
+  const message = process.env.NODE_ENV === 'production' 
+    ? 'Internal server error' 
+    : err.message;
+  
+  res.status(err.status || 500).json({
+    success: false,
+    error: 'Something went wrong!',
+    message,
+    requestId: req.id,
+  });
 });
 
-// Start server
+// Start server with graceful shutdown
 if (require.main === module) {
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     const logger = require('./utils/logger');
-    logger.info(`Server is running on port ${PORT}`);
+    logger.info({
+      port: PORT,
+      environment: process.env.NODE_ENV,
+      nodeVersion: process.version,
+      features: featureFlags.getAllFlags(),
+    }, 'Server started successfully');
   });
+
+  // Setup graceful shutdown
+  const GracefulShutdown = require('./utils/gracefulShutdown');
+  const shutdown = new GracefulShutdown(server, pool);
+  
+  // Add shutdown check to health endpoint
+  app.use(shutdown.healthCheckMiddleware());
 }
 
 module.exports = app;
