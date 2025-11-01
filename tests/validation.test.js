@@ -67,7 +67,9 @@ describe('Request validation', () => {
       .expect(400);
 
     expect(res.body.error).toBe('Validation error');
-    expect(res.body.details).toEqual(expect.arrayContaining([expect.objectContaining({ path: 'title' })]));
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([expect.objectContaining({ path: 'title' })])
+    );
   });
 
   test('POST /api/books should 400 on invalid ISBN (too short)', async () => {
@@ -76,7 +78,9 @@ describe('Request validation', () => {
       .send({ isbn: '123', quantity: 1 })
       .expect(400);
     expect(res.body.error).toBe('Validation error');
-    expect(res.body.details).toEqual(expect.arrayContaining([expect.objectContaining({ path: 'isbn' })]));
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([expect.objectContaining({ path: 'isbn' })])
+    );
   });
 
   test('POST /api/books should 400 on invalid ISBN (non-numeric chars)', async () => {
@@ -85,7 +89,9 @@ describe('Request validation', () => {
       .send({ isbn: 'ABCDEF123X', quantity: 1 })
       .expect(400);
     expect(res.body.error).toBe('Validation error');
-    expect(res.body.details).toEqual(expect.arrayContaining([expect.objectContaining({ path: 'isbn' })]));
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([expect.objectContaining({ path: 'isbn' })])
+    );
   });
 
   test('POST /api/books should 400 on zero quantity', async () => {
@@ -94,15 +100,16 @@ describe('Request validation', () => {
       .send({ isbn: '1234567890123', quantity: 0 })
       .expect(400);
     expect(res.body.error).toBe('Validation error');
-    expect(res.body.details).toEqual(expect.arrayContaining([expect.objectContaining({ path: 'quantity' })]));
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([expect.objectContaining({ path: 'quantity' })])
+    );
   });
 
   test('POST /api/books should 400 on missing quantity', async () => {
-    const res = await request(app)
-      .post('/api/books')
-      .send({ isbn: '1234567890123' })
-      .expect(400);
+    const res = await request(app).post('/api/books').send({ isbn: '1234567890123' }).expect(400);
     expect(res.body.error).toBe('Validation error');
-    expect(res.body.details).toEqual(expect.arrayContaining([expect.objectContaining({ path: 'quantity' })]));
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([expect.objectContaining({ path: 'quantity' })])
+    );
   });
 });

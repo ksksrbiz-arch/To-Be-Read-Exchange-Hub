@@ -95,9 +95,10 @@ function showEditBookModal(book) {
   document.getElementById('editIsbn').value = book.isbn || '';
   document.getElementById('editPublisher').value = book.publisher || '';
   document.getElementById('editQuantity').value = book.quantity || 1;
-  document.getElementById('editShelfLocation').value = 
-    book.shelf_location ? `${book.shelf_location}${book.section ? '-' + book.section : ''}` : '';
-  
+  document.getElementById('editShelfLocation').value = book.shelf_location
+    ? `${book.shelf_location}${book.section ? '-' + book.section : ''}`
+    : '';
+
   document.getElementById('editBookModal').style.display = 'block';
 }
 
@@ -122,7 +123,7 @@ function showViewBookModal(book) {
       ${book.updated_at !== book.created_at ? `<p><strong>Last Updated:</strong> ${new Date(book.updated_at).toLocaleDateString()}</p>` : ''}
     </div>
   `;
-  
+
   document.getElementById('bookDetails').innerHTML = detailsHtml;
   document.getElementById('viewBookModal').style.display = 'block';
 }
@@ -219,7 +220,7 @@ async function handleEditBook(e) {
 
   const formData = new FormData(e.target);
   const bookId = formData.get('id');
-  
+
   const updateData = {
     title: formData.get('title'),
     author: formData.get('author') || null,
@@ -285,32 +286,32 @@ async function handleDeleteBook(bookId, bookTitle) {
 // Handle Search
 function handleSearch(e) {
   const searchTerm = e.target.value.toLowerCase();
-  
-  filteredBooks = allBooks.filter(book => {
+
+  filteredBooks = allBooks.filter((book) => {
     return (
       (book.title && book.title.toLowerCase().includes(searchTerm)) ||
       (book.author && book.author.toLowerCase().includes(searchTerm)) ||
       (book.isbn && book.isbn.toLowerCase().includes(searchTerm))
     );
   });
-  
+
   applyFiltersAndSort();
 }
 
 // Handle Filter
 function handleFilter(e) {
   const shelfFilter = e.target.value;
-  
+
   if (!shelfFilter) {
     filteredBooks = [...allBooks];
   } else {
-    filteredBooks = allBooks.filter(book => book.shelf_location === shelfFilter);
+    filteredBooks = allBooks.filter((book) => book.shelf_location === shelfFilter);
   }
-  
+
   // Reapply search if there's text in search box
   const searchTerm = document.getElementById('searchInput').value.toLowerCase();
   if (searchTerm) {
-    filteredBooks = filteredBooks.filter(book => {
+    filteredBooks = filteredBooks.filter((book) => {
       return (
         (book.title && book.title.toLowerCase().includes(searchTerm)) ||
         (book.author && book.author.toLowerCase().includes(searchTerm)) ||
@@ -318,7 +319,7 @@ function handleFilter(e) {
       );
     });
   }
-  
+
   applyFiltersAndSort();
 }
 
@@ -331,14 +332,14 @@ function handleSort(e) {
 // Apply filters and sorting
 function applyFiltersAndSort() {
   let booksToDisplay = [...filteredBooks];
-  
+
   // Sort books
   const [sortBy, sortOrder] = currentSort.split('-');
-  
+
   booksToDisplay.sort((a, b) => {
     let aVal, bVal;
-    
-    switch(sortBy) {
+
+    switch (sortBy) {
       case 'title':
         aVal = (a.title || '').toLowerCase();
         bVal = (b.title || '').toLowerCase();
@@ -360,14 +361,14 @@ function applyFiltersAndSort() {
         bVal = new Date(b.created_at || 0);
         break;
     }
-    
+
     if (sortOrder === 'asc') {
       return aVal > bVal ? 1 : -1;
     } else {
       return aVal < bVal ? 1 : -1;
     }
   });
-  
+
   displayBooks(booksToDisplay);
 }
 
@@ -383,14 +384,25 @@ function exportData(format) {
   } else if (format === 'json') {
     exportJson();
   }
-  
+
   document.getElementById('exportModal').style.display = 'none';
 }
 
 // Export as CSV
 function exportCsv() {
-  const headers = ['ID', 'Title', 'Author', 'ISBN', 'Publisher', 'Shelf Location', 'Section', 'Quantity', 'Available', 'Added'];
-  const rows = allBooks.map(book => [
+  const headers = [
+    'ID',
+    'Title',
+    'Author',
+    'ISBN',
+    'Publisher',
+    'Shelf Location',
+    'Section',
+    'Quantity',
+    'Available',
+    'Added',
+  ];
+  const rows = allBooks.map((book) => [
     book.id,
     book.title || '',
     book.author || '',
@@ -400,14 +412,14 @@ function exportCsv() {
     book.section || '',
     book.quantity || 0,
     book.available_quantity || 0,
-    new Date(book.created_at).toLocaleDateString()
+    new Date(book.created_at).toLocaleDateString(),
   ]);
-  
+
   const csvContent = [
     headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
   ].join('\n');
-  
+
   downloadFile(csvContent, 'books-inventory.csv', 'text/csv');
   showNotification('CSV exported successfully!', 'success');
 }
@@ -452,18 +464,19 @@ async function loadBooks() {
 
 // Update shelf filter options
 function updateShelfFilter() {
-  const shelves = [...new Set(allBooks.map(book => book.shelf_location).filter(Boolean))].sort();
+  const shelves = [...new Set(allBooks.map((book) => book.shelf_location).filter(Boolean))].sort();
   const filterSelect = document.getElementById('filterShelf');
-  
-  filterSelect.innerHTML = '<option value="">All Shelves</option>' + 
-    shelves.map(shelf => `<option value="${shelf}">Shelf ${shelf}</option>`).join('');
+
+  filterSelect.innerHTML =
+    '<option value="">All Shelves</option>' +
+    shelves.map((shelf) => `<option value="${shelf}">Shelf ${shelf}</option>`).join('');
 }
 
 // Display books in grid
 function displayBooks(books) {
   const booksGrid = document.getElementById('booksGrid');
   const bookCount = document.getElementById('bookCount');
-  
+
   bookCount.textContent = books.length;
 
   if (books.length === 0) {
@@ -486,9 +499,9 @@ function displayBooks(books) {
                 <p class="book-quantity">Stock: ${book.available_quantity || 0} / ${book.quantity || 0}</p>
             </div>
             <div class="book-actions">
-                <button class="btn-action btn-view" onclick='viewBook(${JSON.stringify(book).replace(/'/g, "&apos;")})' title="View Details">👁️</button>
-                <button class="btn-action btn-edit" onclick='editBook(${JSON.stringify(book).replace(/'/g, "&apos;")})' title="Edit">✏️</button>
-                <button class="btn-action btn-delete" onclick='deleteBook(${book.id}, "${escapeHtml(book.title).replace(/"/g, "&quot;")}")' title="Delete">🗑️</button>
+                <button class="btn-action btn-view" onclick='viewBook(${JSON.stringify(book).replace(/'/g, '&apos;')})' title="View Details">👁️</button>
+                <button class="btn-action btn-edit" onclick='editBook(${JSON.stringify(book).replace(/'/g, '&apos;')})' title="Edit">✏️</button>
+                <button class="btn-action btn-delete" onclick='deleteBook(${book.id}, "${escapeHtml(book.title).replace(/"/g, '&quot;')}")' title="Delete">🗑️</button>
             </div>
         </div>
     `

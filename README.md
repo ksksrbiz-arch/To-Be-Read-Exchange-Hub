@@ -247,7 +247,8 @@ Open your browser and navigate to:
 
 - **Web Interface:** `http://localhost:3000`
 - **Health Check:** `http://localhost:3000/health` (returns `{"status":"ok"}`)
-- **DB Health Check:** `http://localhost:3000/api/health/db` (returns `{"status":"ok","db":"connected"}`)
+- **DB Health Check:** `http://localhost:3000/api/health/db` (returns
+  `{"status":"ok","db":"connected"}`)
 
 If you see the web interface, you're all set! 🎉
 
@@ -294,6 +295,7 @@ The application provides a comprehensive RESTful API for managing books and sync
 ### Interactive API Documentation
 
 Visit **http://localhost:3000/api-docs** for interactive Swagger UI documentation where you can:
+
 - 📖 Browse all API endpoints with detailed descriptions
 - 🧪 Test API calls directly in your browser
 - 📋 View request/response schemas and examples
