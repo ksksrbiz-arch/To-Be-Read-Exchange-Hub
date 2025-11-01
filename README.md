@@ -116,6 +116,10 @@ Open issues for roadmap items (RBAC extension, sales flow, tracing exporters). W
 ## 📄 License
 
 ISC — permissive use. Attribution appreciated but not required.
+- **Web Interface:** `http://localhost:3000`
+- **Health Check:** `http://localhost:3000/health` (returns `{"status":"ok"}`)
+- **DB Health Check:** `http://localhost:3000/api/health/db` (returns
+  `{"status":"ok","db":"connected"}`)
 
 ## 🔗 Deep Dive References
 
@@ -123,6 +127,54 @@ ISC — permissive use. Attribution appreciated but not required.
 
 ---
 Lean README by design — everything else lives in specialized docs. If something feels missing here, it probably has its own file.
+### Environment Variables
+
+| Variable               | Description                                  | Default          |
+| ---------------------- | -------------------------------------------- | ---------------- |
+| `PORT`                 | Application server port                      | `3000`           |
+| `NODE_ENV`             | Environment mode                             | `development`    |
+| `LOG_LEVEL`            | Logger level (`error`, `warn`, `info`, etc.) | `info`           |
+| `API_RATE_WINDOW_MIN`  | API rate limit window (minutes)              | `15`             |
+| `API_RATE_MAX`         | Max API requests per IP per window           | `100`            |
+| `SYNC_RATE_WINDOW_MIN` | Sync rate limit window (minutes)             | `15`             |
+| `SYNC_RATE_MAX`        | Max sync requests per window                 | `10`             |
+| `DB_USER`              | PostgreSQL username                          | `postgres`       |
+| `DB_HOST`              | Database host address                        | `localhost`      |
+| `DB_NAME`              | Database name                                | `books_exchange` |
+| `DB_PASSWORD`          | PostgreSQL password                          | `postgres`       |
+| `DB_PORT`              | PostgreSQL port                              | `5432`           |
+
+## Usage
+
+### Web Interface
+
+1. Open your browser and navigate to `http://localhost:3000`
+2. Use the web interface to:
+   - Add new books (manually or via ISBN lookup)
+   - View and search your inventory
+   - Update book information
+   - Sync with Pingo systems
+   - Manage shelf locations
+
+### API Usage
+
+You can interact with the application programmatically using the REST API. See the
+[API Documentation](#api-documentation) section below for details.
+
+## API Documentation
+
+The application provides a comprehensive RESTful API for managing books and syncing inventory.
+
+### Interactive API Documentation
+
+Visit **http://localhost:3000/api-docs** for interactive Swagger UI documentation where you can:
+
+- 📖 Browse all API endpoints with detailed descriptions
+- 🧪 Test API calls directly in your browser
+- 📋 View request/response schemas and examples
+- 🔍 Explore all available parameters and data models
+
+The Swagger documentation is automatically generated from the codebase and always up-to-date.
 
 ### Quick API Reference
 
