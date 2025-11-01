@@ -9,7 +9,7 @@ const logger = require('../utils/logger');
  * Prevents malicious files disguised with wrong extensions
  */
 function validateFileMagicNumber(buffer, mimetype) {
-  if (!buffer || buffer.length < 12) {
+  if (!buffer || buffer.length < 3) {
     return false;
   }
 
@@ -60,6 +60,10 @@ function validateFileMagicNumber(buffer, mimetype) {
 
   // Check if buffer starts with any of the expected signatures
   return expectedSignatures.some(signature => {
+    // Only check if buffer is long enough for this signature
+    if (buffer.length < signature.length) {
+      return false;
+    }
     return signature.every((byte, index) => buffer[index] === byte);
   });
 }

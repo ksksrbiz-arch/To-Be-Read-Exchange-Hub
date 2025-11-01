@@ -26,9 +26,9 @@ describe('SLO Monitor', () => {
   });
 
   test('histogram metric registers observations', () => {
-    const beforeCount = sloLatency.hashMap.size;
+    const beforeCount = Object.keys(sloLatency.hashMap).length;
     sloMonitor.recordRequest(50, false, '/api/metric', 'POST');
-    const afterCount = sloLatency.hashMap.size;
+    const afterCount = Object.keys(sloLatency.hashMap).length;
     expect(afterCount).toBeGreaterThanOrEqual(beforeCount); // may increase or remain if same label set
   });
 });
