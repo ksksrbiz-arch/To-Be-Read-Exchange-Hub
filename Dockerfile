@@ -1,5 +1,5 @@
 # Multi-stage build for production
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN npm ci --only=production
 COPY . .
 
 # Production stage
-FROM node:20-alpine
+FROM node:25-alpine
 
 # Install dumb-init and curl for proper signal handling and health checks
 RUN apk add --no-cache dumb-init curl
