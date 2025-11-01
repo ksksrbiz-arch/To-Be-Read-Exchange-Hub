@@ -64,7 +64,7 @@
     "winston": "^3.18.3"
   },
   "devDependencies": {
-    "eslint": "^9.38.0",
+    "eslint": "^9.39.0",
     "jest": "^30.2.0",
     "nodemon": "^3.1.10",
     "npm": "11.6.2",
