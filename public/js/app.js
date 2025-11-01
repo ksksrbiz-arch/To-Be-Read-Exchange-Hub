@@ -510,9 +510,6 @@ function displayBooks(books) {
 }
 
 // Global functions for onclick handlers
-function viewBook(book) {
-  showViewBookModal(book);
-}
 
 function editBook(book) {
   showEditBookModal(book);
