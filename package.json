@@ -41,7 +41,7 @@
     "@opentelemetry/sdk-node": "^0.208.0",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
-    "body-parser": "^2.2.1",
+    "body-parser": "^2.2.2",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
